@@ -1,7 +1,7 @@
 <?php
 // $Id$
-require_once('general_deletion.inc');
-require_once('email.inc');
+// require_once('general_deletion.inc');
+// require_once('email.inc');
 /**
  * Implementation of hook_menu().
  */
@@ -19,7 +19,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration create proposal'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        //'type' => MENU_NORMAL_ITEM,
         'file' => 'proposal.inc'
     );
     $items['lab-migration/manage-proposal'] = array(
@@ -40,7 +40,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        //'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => 1,
         'file' => 'manage_proposal.inc'
     );
@@ -52,7 +52,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'weight' => 2,
         'file' => 'manage_solution_proposal.inc'
     );
@@ -64,7 +64,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'weight' => 3,
         'file' => 'manage_proposal.inc'
     );
@@ -76,7 +76,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'weight' => 4,
         'file' => 'manage_proposal.inc'
     );
@@ -88,7 +88,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'weight' => 5,
         'file' => 'manage_proposal.inc'
     );
@@ -102,7 +102,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration edit proposal'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     $items['lab-migration/manage-proposal/approve'] = array(
@@ -115,7 +115,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     $items['lab-migration/manage-proposal/solution-proposal-approve'] = array(
@@ -128,7 +128,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'manage_solution_proposal.inc'
     );
     $items['lab-migration/manage-proposal/edit'] = array(
@@ -141,7 +141,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration manage proposal'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     $items['lab-migration/manage-proposal/status'] = array(
@@ -154,7 +154,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration approve proposal'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     /* SOLUTION PROPOSAL */
@@ -165,7 +165,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration propose solution'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        //'type' => MENU_NORMAL_ITEM,
         'file' => 'solution_proposal.inc'
     );
     $items['lab-migration/show-proposal'] = array(
@@ -177,7 +177,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration propose solution'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'solution_proposal.inc'
     );
     /* CODE REVIEW */
@@ -188,7 +188,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration approve code'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        //'type' => MENU_NORMAL_ITEM,
         'file' => 'code_approval.inc'
     );
     $items['lab-migration/code-approval/approve'] = array(
@@ -201,7 +201,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration approve code'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        //'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => 1,
         'file' => 'code_approval.inc'
     );
@@ -215,7 +215,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration bulk manage code'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'weight' => 2,
         'file' => 'bulk_approval.inc'
     );
@@ -229,7 +229,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration bulk manage code'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'weight' => 2,
         'file' => 'bulk_approval.inc'
     );
@@ -239,7 +239,7 @@ function lab_migration_menu()
     'page callback' => 'drupal_get_form',
     'page arguments' => array('lab_migration_dependency_approval_form'),
     'access arguments' => array('lab migration bulk manage code'),
-    'type' => MENU_LOCAL_TASK,
+    //'type' => MENU_LOCAL_TASK,
     'weight' => 3,
     'file' => 'dependency_approval.inc',
     );*/
@@ -253,7 +253,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration bulk manage code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'weight' => 4,
         'file' => 'bulk_upload_code.inc'
     );
@@ -267,7 +267,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration bulk manage code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'weight' => 4,
         'file' => 'notes.inc'
     );
@@ -289,7 +289,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration upload code'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        //'type' => MENU_DEFAULT_LOCAL_TASK,
         'file' => 'upload_code.inc',
         'weight' => 1
     );
@@ -303,7 +303,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration upload code'
         ),
-        'type' => MENU_LOCAL_TASK,
+        //'type' => MENU_LOCAL_TASK,
         'file' => 'upload_code.inc',
         'weight' => 2
     );
@@ -313,7 +313,7 @@ function lab_migration_menu()
     'page callback' => 'drupal_get_form',
     'page arguments' => array('lab_migration_upload_dependency_form'),
     'access arguments' => array('lab migration upload code'),
-    'type' => MENU_LOCAL_TASK,
+    //'type' => MENU_LOCAL_TASK,
     'file' => 'dependency.inc',
     'weight' => 3,
     );*/
@@ -324,7 +324,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration upload code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'upload_code_delete.inc'
     );
     /* CODE DOWNLOADS */
@@ -335,7 +335,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration download code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     /*$items['lab_migration/download/dependency'] = array(
@@ -343,7 +343,7 @@ function lab_migration_menu()
     'description' => 'Code Download', 
     'page callback' => 'lab_migration_download_dependency_file',
     'access arguments' => array('lab migration download code'),
-    'type' => MENU_CALLBACK,
+    //'type' => MENU_CALLBACK,
     'file' => 'download.inc',
     );*/
     $items['lab-migration/download/solution'] = array(
@@ -353,7 +353,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration download code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     $items['lab-migration/download/experiment'] = array(
@@ -363,7 +363,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration download code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     $items['lab-migration/download/lab'] = array(
@@ -373,7 +373,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration download code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     $items['lab-migration/full-download/experiment'] = array(
@@ -383,7 +383,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration approve code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'full_download.inc'
     );
     $items['lab-migration/full-download/lab'] = array(
@@ -393,7 +393,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration approve code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'full_download.inc'
     );
     /* COMPLETED LAB MIGRATIONS */
@@ -424,7 +424,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration download code'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        //'type' => MENU_NORMAL_ITEM,
         'file' => 'run.inc'
     );
     /*$items['lab_migration_run'] = array(
@@ -432,7 +432,7 @@ function lab_migration_menu()
     'page callback' => 'drupal_get_form',
     'page arguments' => array('lab_migration_run_form_ajax'),
     'access arguments' => array('access content'),
-    'type' => MENU_NORMAL_ITEM,
+    //'type' => MENU_NORMAL_ITEM,
     'file' => 'run.inc',
     );
     $items['lab_migration_run_ajax'] = array(
@@ -445,7 +445,7 @@ function lab_migration_menu()
     'page callback' => 'drupal_get_form',
     'page arguments' => array('lab_migration_run_form_ajax'),
     'access arguments' => array('access content'),
-    'type' => MENU_NORMAL_ITEM,
+    //'type' => MENU_NORMAL_ITEM,
     'file' => 'run.inc',
     );*/
     /* LATEX SCRIPT */
@@ -456,7 +456,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration generate lab'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'latex.inc'
     );
     $items['lab-migration/delete-lab'] = array(
@@ -466,7 +466,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'lab migration approve code'
         ),
-        'type' => MENU_CALLBACK,
+        //'type' => MENU_CALLBACK,
         'file' => 'latex.inc'
     );
     /* ADMIN SETTINGS */
@@ -480,7 +480,7 @@ function lab_migration_menu()
         'access arguments' => array(
             'administer lab migration'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        //'type' => MENU_NORMAL_ITEM,
         'file' => 'settings.inc'
     );
     /* AJAX REQUEST */
@@ -490,14 +490,14 @@ function lab_migration_menu()
         "access arguments" => array(
             "lab migration bulk manage code"
         ),
-        "type" => MENU_CALLBACK,
+        //"type" => MENU_CALLBACK,
         'file' => 'bulk_approval.inc'
     );
     /*  $items["lab_migration/code_approval/dependency/ajax"] = array(
     "title" => "Ajax callbacks",
     "page callback" => "lab_migration_dependency_approval_ajax",
     "access arguments" => array("lab migration bulk manage code"),
-    "type" => MENU_CALLBACK,
+    //"type" => MENU_CALLBACK,
     'file' => 'dependency_approval.inc',
     );*/
     return $items;
@@ -567,8 +567,8 @@ function lab_migration_ajax()
       {
         $chapter_number = arg(3);
         $preference_id = arg(4);
-        //$chapter_q = db_query("SELECT * FROM {lab_migration_chapter} WHERE number = %d AND preference_id = %d LIMIT 1", $chapter_number, $preference_id);
-        $query = db_select('lab_migration_chapter');
+        //$chapter_q = \Drupal::database()->query("SELECT * FROM {lab_migration_chapter} WHERE number = %d AND preference_id = %d LIMIT 1", $chapter_number, $preference_id);
+        $query = \Drupal::database()->select('lab_migration_chapter');
         $query->fields('lab_migration_chapter');
         $query->condition('number', $chapter_number);
         $query->condition('preference_id', $preference_id);
@@ -586,7 +586,7 @@ function lab_migration_ajax()
         $preference_id = arg(4);
         $example_number = arg(5);
         $chapter_id = 0;
-        $query = db_select('lab_migration_chapter');
+        $query = \Drupal::database()->select('lab_migration_chapter');
         $query->fields('lab_migration_chapter');
         $query->condition('number', $chapter_number);
         $query->condition('preference_id', $preference_id);
@@ -601,7 +601,7 @@ function lab_migration_ajax()
           {
             $chapter_id = $chapter_data->id;
           }
-        $query = db_select('lab_migration_example');
+        $query = \Drupal::database()->select('lab_migration_example');
         $query->fields('lab_migration_example');
         $query->condition('chapter_id', $chapter_id);
         $query->condition('number', $example_number);
@@ -649,9 +649,9 @@ function lab_migration_path()
 /************************* USER VERIFICATION FUNCTIONS ************************/
 function lab_migration_get_proposal()
   {
-    global $user;
-    //$proposal_q = db_query("SELECT * FROM {lab_migration_proposal} WHERE solution_provider_uid = ".$user->uid." AND solution_status = 2 ORDER BY id DESC LIMIT 1");
-    $query = db_select('lab_migration_proposal');
+    $user = \Drupal::currentUser();
+    //$proposal_q = \Drupal::database()->query("SELECT * FROM {lab_migration_proposal} WHERE solution_provider_uid = ".$user->uid." AND solution_status = 2 ORDER BY id DESC LIMIT 1");
+    $query = \Drupal::database()->select('lab_migration_proposal');
     $query->fields('lab_migration_proposal');
     $query->condition('solution_provider_uid', $user->uid);
     $query->condition('solution_status', 2);
@@ -661,24 +661,27 @@ function lab_migration_get_proposal()
     $proposal_data = $proposal_q->fetchObject();
     if (!$proposal_data)
       {
-        drupal_set_message("You do not have any approved Lab migraion solution proposal. Please check the " . l('available', 'lab-migration/open-proposal') . " Lab migration proposal.", 'error');
+        // @FIXME
+// l() expects a Url object, created from a route name or external URI.
+// \Drupal::messenger()->addmesssage("You do not have any approved Lab migraion solution proposal. Please check the " . l('available', 'lab-migration/open-proposal') . " Lab migration proposal.", 'error');
+
         drupal_goto('');
       }
     switch ($proposal_data->approval_status)
     {
         case 0:
-            drupal_set_message(t('Proposal is awaiting approval.'), 'status');
+            \Drupal::messenger()->addStatus(t('Proposal is awaiting approval.'));
             return FALSE;
         case 1:
             return $proposal_data;
         case 2:
-            drupal_set_message(t('Proposal has been dis-approved.'), 'error');
+            \Drupal::messenger()->addError(t('Proposal has been dis-approved.'));
             return FALSE;
         case 3:
-            drupal_set_message(t('Proposal has been marked as completed.'), 'status');
+            \Drupal::messenger()->addStatus(t('Proposal has been marked as completed.'));
             return FALSE;
         default:
-            drupal_set_message(t('Invalid proposal state. Please contact site administrator for further information.'), 'error');
+            \Drupal::messenger()->addError(t('Invalid proposal state. Please contact site administrator for further information.'));
             return FALSE;
     }
     return FALSE;
