@@ -264,7 +264,7 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     $form['version'] = [
       '#type' => 'select',
       // '#attributes' => array('class' => array('form-control')),
-'#title' => $this->t(' dwsim_software_version'),
+'#title' => $this->t('version'),
       '#options' =>\Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
       '#required' => TRUE,
     ];
