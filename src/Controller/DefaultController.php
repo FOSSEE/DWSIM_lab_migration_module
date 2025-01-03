@@ -462,11 +462,11 @@ $link = Link::fromTextAndUrl(t('Edit'), $url)->toString();
         '#markup' => $proposal_data->operating_system,
         '#title' => t('Operating System')
     );
-    $form['version'] = array(
-        '#type' => 'item',
-        '#markup' => $proposal_data->version,
-        '#title' => t('Version')
-    );
+    // $form['version'] = array(
+    //     '#type' => 'item',
+    //     '#markup' => $proposal_data->version,
+    //     '#title' => t('Version')
+    // );
     $form['syllabus_link'] = array(
         '#type' => 'item',
         '#markup' => $proposal_data->syllabus_link,
@@ -1060,10 +1060,10 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
             $solution_files_q = $query->execute();
        
         while ($solution_files_row = $solution_files_q->fetchObject()) {
-           //var_dump($LAB_PATH . $solution_files_row->filepath);die;
+          //  var_dump($LAB_PATH . $solution_files_row->filepath);die;
            $zip->addFile($root_path . $LAB_PATH . $solution_files_row->filepath, $LAB_PATH . $EXP_PATH . $CODE_PATH . str_replace(' ', '_', ($solution_files_row->filename)));
           //$zip->addFile($root_path. $LAB_PATH . $EXP_PATH . $CODE_PATH . $solution_files_row->filename);
-          //var_dump($zip->numFiles);
+          // var_dump($zip->numFiles);
         }
         
         // die;
@@ -1071,7 +1071,7 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
       }
     }
     $zip_file_count = $zip->numFiles;
-     //var_dump($zip_file_count);die;
+    //  var_dump($zip_file_count);die;
     $zip->close();
     if ($zip_file_count > 0) {
       if ($user->uid) {
@@ -1753,12 +1753,12 @@ public function lab_migration_download_syllabus_copy() {
       ),
       '#required' => TRUE,
     );
-    $form['freecad_version'] = array(
-      '#type' => 'select',
-      '#title' => t('R version used'),
-      '#options' => _lm_list_of_software_version(),
-      '#required' => TRUE,
-    );
+    // $form['freecad_version'] = array(
+    //   '#type' => 'select',
+    //   '#title' => t('R version used'),
+    //   '#options' => _lm_list_of_software_version(),
+    //   '#required' => TRUE,
+    // );
     $form['toolbox_used'] = array(
       '#type' => 'hidden',
       '#title' => t('Toolbox used (If any)'),

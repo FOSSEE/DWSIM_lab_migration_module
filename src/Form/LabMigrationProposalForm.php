@@ -261,13 +261,13 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
       '#markup' => '<hr>',
     ];
     
-    $form['version'] = [
-      '#type' => 'select',
-      // '#attributes' => array('class' => array('form-control')),
-'#title' => $this->t('version'),
-      '#options' =>\Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
-      '#required' => TRUE,
-    ];
+//     $form['version'] = [
+//       '#type' => 'select',
+//       // '#attributes' => array('class' => array('form-control')),
+// '#title' => $this->t('version'),
+//       '#options' =>\Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
+//       '#required' => TRUE,
+//     ];
     $form['older'] = [
       '#type' => 'textfield',
       '#size' => 30,
@@ -481,7 +481,7 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
 
   public function submitForm(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
     $user = currentUser();
-    if (!$user->id()) {
+        if (!$user->id()) {
       \Drupal::messenger()->addmessage('It is mandatory to login on this website to access the proposal form');
       return;
     }
@@ -540,7 +540,7 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     'state' => $v['all_state'],
     'country' => $v['country'],
     'operating_system' => $v['operating_system'],
-    'version' => $form_state->getValue(['version']),
+    // 'version' => $form_state->getValue(['version']),
     'syllabus_link' => $v['syllabus_link'],
     'lab_title' => $v['lab_title'],
     'approval_status' => 0,

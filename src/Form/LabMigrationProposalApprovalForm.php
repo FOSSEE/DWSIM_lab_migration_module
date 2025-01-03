@@ -79,7 +79,7 @@ $proposal_id = (int) $route_match->getParameter('id');
     $form['email_id'] = [
       '#type' => 'item',
       // '#markup' => loadMultiple($proposal_data->uid)->mail,
-      '#markup' => \Drupal\user\Entity\User::load($proposal_data->uid)->getEmail(),
+      // '#markup' => User::load($proposal_data->uid)->getEmail(),
 
       '#title' => t('Email'),
     ];
@@ -123,12 +123,12 @@ $proposal_id = (int) $route_match->getParameter('id');
       '#markup' => $proposal_data->operating_system,
       '#title' => t('Operating System'),
     ];
-    $form['version'] = [
-      '#type' => 'item',
-      // '#markup' => $proposal_data->version,
-      '#markup' => isset($proposal_data->version) ? $proposal_data->version : $this->t('Not available'),
-      '#title' =>$this-> t('Version'),
-    ];
+    // $form['version'] = [
+    //   '#type' => 'item',
+    //   // '#markup' => $proposal_data->version,
+    //   '#markup' => isset($proposal_data->version) ? $proposal_data->version : $this->t('Not available'),
+    //   '#title' =>$this-> t('Version'),
+    // ];
     $form['syllabus_link'] = [
       '#type' => 'item',
       '#markup' => $proposal_data->syllabus_link,
@@ -175,7 +175,7 @@ $proposal_id = (int) $route_match->getParameter('id');
         $solution_provider = "Proposer will provide the solution of the lab";
       }
       else {
-        $solution_provider_user_data = loadMultiple($proposal_data->solution_provider_uid);
+        $solution_provider_user_data = User::load($proposal_data->solution_provider_uid);
         if ($solution_provider_user_data) {
           $solution_provider = "Solution will be provided by user " . Link::fromTextAndUrl($solution_provider_user_data->name, 'user/' . $proposal_data->solution_provider_uid);
         }

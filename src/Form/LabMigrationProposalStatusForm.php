@@ -106,12 +106,12 @@ $proposal_id = (int) $route_match->getParameter('id');
       '#markup' => $proposal_data->operating_system,
       '#title' => t('Operating System'),
     ];
-    $form['version'] = [
-      '#type' => 'item',
-      '#markup' => $proposal_data->version,
-      // '#markup' => Xss::filter($proposal_data->version),
-      '#title' => t('R Version'),
-    ];
+    // $form['version'] = [
+    //   '#type' => 'item',
+    //   '#markup' => $proposal_data->version,
+    //   // '#markup' => Xss::filter($proposal_data->version),
+    //   '#title' => t('R Version'),
+    // ];
     $form['syllabus_link'] = [
       '#type' => 'item',
       '#markup' => $proposal_data->syllabus_link,

@@ -209,12 +209,12 @@ return new RedirectResponse('/lab-migration/manage-proposal/pending');
       '#default_value' => $proposal_data->operating_system,
       '#title' => t('Operating System'),
     ];
-    $form['version'] = [
-      '#type' => 'select',
-      '#title' => t('R Version'),
-      '#options' => \Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
-      '#default_value' => $proposal_data->version,
-    ];
+    // $form['version'] = [
+    //   '#type' => 'select',
+    //   '#title' => t('R Version'),
+    //   '#options' => \Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
+    //   '#default_value' => $proposal_data->version,
+    // ];
     $form['syllabus_link'] = [
       '#type' => 'item',
       '#markup' => $proposal_data->syllabus_link,
