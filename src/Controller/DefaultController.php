@@ -1060,7 +1060,7 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
             $solution_files_q = $query->execute();
        
         while ($solution_files_row = $solution_files_q->fetchObject()) {
-          //  var_dump($LAB_PATH . $solution_files_row->filepath);die;
+           var_dump($LAB_PATH . $solution_files_row->filepath);die;
            $zip->addFile($root_path . $LAB_PATH . $solution_files_row->filepath, $LAB_PATH . $EXP_PATH . $CODE_PATH . str_replace(' ', '_', ($solution_files_row->filename)));
           //$zip->addFile($root_path. $LAB_PATH . $EXP_PATH . $CODE_PATH . $solution_files_row->filename);
           // var_dump($zip->numFiles);
