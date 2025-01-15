@@ -108,7 +108,7 @@ public function _lm_list_of_cities()
     $software_version_list = $query->execute();
     while ($software_version_list_data = $software_version_list->fetchObject())
       {
-        $software_version[$software_version_list_data->freecad_version] = $software_version_list_data->freecad_version;
+        $software_version[$software_version_list_data->dwsim_version] = $software_version_list_data->dwsim_version;
       }
     return $software_version;
   }
@@ -127,9 +127,9 @@ public function _lm_list_of_cities()
 }
 public function _lm_dir_name($lab, $name, $university)
   {
-    $lab_title = lm_ucname($lab);
-    $proposar_name = lm_ucname($lab);
-    $university_name = lm_ucname($university);
+    $lab_title = \Drupal::service("lab_migration_global")->lm_ucname($lab);
+    $proposar_name = \Drupal::service("lab_migration_global")->lm_ucname($lab);
+    $university_name = \Drupal::service("lab_migration_global")->lm_ucname($university);
     $dir_name = $lab_title . " " . "by". " " . $proposar_name . ' ' . $university_name;
     $directory_name = str_replace("__", "_", str_replace(" ", "_", $dir_name));
     return $directory_name;
@@ -157,7 +157,7 @@ public function lm_ucname($string)
   }
   public function lab_migration_path()
   {
-    return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'freecad_uploads/lab_migration_uploads/';
+    return $_SERVER['DOCUMENT_ROOT'] . base_path() . 'DWSIM_uploads/lab_migration_uploads/';
   }
   public function _bulk_list_of_labs()
   {
@@ -701,7 +701,7 @@ public  function lab_migration_delete_experiment($experiment_id)
   );
   $form['version'] = array(
     '#type' => 'select',
-    '#title' => t('FreeCAD version used'),
+    '#title' => t('DWSIM version used'),
     '#options' => _lm_list_of_software_version(),
     '#required' => TRUE,
   );

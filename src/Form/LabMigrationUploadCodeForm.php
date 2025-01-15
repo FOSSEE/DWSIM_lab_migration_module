@@ -132,7 +132,7 @@ $response->send();
     ];
     $form['version'] = [
       '#type' => 'select',
-      '#title' => t('FreeCAD version used'),
+      '#title' => t('DWSIM version used'),
       '#options' => \Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
       '#required' => TRUE,
     ];

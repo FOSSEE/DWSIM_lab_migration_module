@@ -24,11 +24,16 @@ use Drupal\Core\Render\Markup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 /**
  * Default controller for the lab_migration module.
  */
 class DefaultController extends ControllerBase {
+
+   
+ 
+  
 
   public function lab_migration_proposal_pending() {
     /* get pending proposals to be approved */
@@ -1005,14 +1010,90 @@ $response->send();
     }
   }
 
-
   public function lab_migration_download_lab() {
+    $current_user = \Drupal::currentUser();
+    $route_match = \Drupal::routeMatch();
+    $lab_id = (int) $route_match->getParameter('lab_id');
+
+    // Get the root path from the custom service.
+    $root_path = \Drupal::service('lab_migration_global')->lab_migration_path();
+
+    // Fetch lab details.
+    $query = \Drupal::database()->select('lab_migration_proposal', 'lmp')
+      ->fields('lmp')
+      ->condition('id', $lab_id);
+    $lab_data = $query->execute()->fetchObject();
+
+    if (!$lab_data) {
+      \Drupal::messenger()->addError($this->t('Lab not found.'));
+      return new RedirectResponse(Url::fromRoute('<front>')->toString());
+    }
+
+    $LAB_PATH = $lab_data->directory_name . '/';
+    $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
+
+    $zip = new \ZipArchive();
+    $zip->open($zip_filename, \ZipArchive::CREATE);
+
+    // Fetch experiments for the lab.
+    $experiment_query =\Drupal::database()->select('lab_migration_experiment', 'lme')
+      ->fields('lme')
+      ->condition('proposal_id', $lab_id);
+    $experiment_results = $experiment_query->execute();
+
+    while ($experiment_row = $experiment_results->fetchObject()) {
+      $EXP_PATH = 'EXP' . $experiment_row->number . '/';
+
+      // Fetch solutions for the experiment.
+      $solution_query =\Drupal::database()->select('lab_migration_solution', 'lms')
+        ->fields('lms')
+        ->condition('experiment_id', $experiment_row->id)
+        ->condition('approval_status', 1);
+      $solution_results = $solution_query->execute();
+
+      while ($solution_row = $solution_results->fetchObject()) {
+        $CODE_PATH = 'CODE' . $solution_row->code_number . '/';
+
+        // Fetch solution files.
+        $files_query =\Drupal::database()->select('lab_migration_solution_files', 'lmsf')
+          ->fields('lmsf')
+          ->condition('solution_id', $solution_row->id);
+        $files_results = $files_query->execute();
+
+        while ($file = $files_results->fetchObject()) {
+          $file_path = $root_path . $LAB_PATH . $file->filepath;
+          $zip_path = $LAB_PATH . $EXP_PATH . $CODE_PATH . str_replace(' ', '_', $file->filename);
+
+          if (file_exists($file_path)) {
+            $zip->addFile($file_path, $zip_path);
+          }
+        }
+      }
+    }
+
+    $zip_file_count = $zip->numFiles;
+    $zip->close();
+
+    if ($zip_file_count > 0) {
+      $response = new BinaryFileResponse($zip_filename);
+      $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, str_replace(' ', '_', $lab_data->lab_title) . '.zip');
+      $response->deleteFileAfterSend(true);
+
+      return $response;
+    }
+    else {
+      \Drupal::messenger()->addError($this->t('There are no solutions in this Lab to download.'));
+      return new RedirectResponse(Url::fromRoute('lab_migration.run_form')->toString());
+    }
+  }
+  public function lab_migration_download_lab1() {
     $user = \Drupal::currentUser();
     
     $route_match = \Drupal::routeMatch();
 
 $lab_id = (int) $route_match->getParameter('lab_id');
 $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
+// var_dump($lab_id);die;
 // var_dump($lab_id);die;
 
     /* get solution data */
@@ -1029,8 +1110,9 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
 
 // Create the zip filename.
 // $zip_filename = $temporary_directory . '/zip-' . time() . '-' . rand(0, 999999) . '.zip';
-
-    $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
+// var_dump($root_path);die;
+    $zip_filename = $root_path . '/zip-' . time() . '-' . rand(0, 999999) . '.zip';
+    // var_dump($zip_filename);die;
     /* creating zip archive on the server */
     $zip = new \ZipArchive();
     $zip->open($zip_filename, \ZipArchive::CREATE);
@@ -1060,8 +1142,10 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
             $solution_files_q = $query->execute();
        
         while ($solution_files_row = $solution_files_q->fetchObject()) {
-           var_dump($LAB_PATH . $solution_files_row->filepath);die;
-           $zip->addFile($root_path . $LAB_PATH . $solution_files_row->filepath, $LAB_PATH . $EXP_PATH . $CODE_PATH . str_replace(' ', '_', ($solution_files_row->filename)));
+          //  var_dump($root_path);die;
+          //  var_dump($LAB_PATH);die;
+          // var_dump($root_path . $LAB_PATH . $solution_files_row->filepath, $LAB_PATH . $EXP_PATH . $CODE_PATH . str_replace(' ', '_', ($solution_files_row->filename)));die;
+          $zip->addFile($root_path . $LAB_PATH . $solution_files_row->filepath, $LAB_PATH . $EXP_PATH . $CODE_PATH . str_replace(' ', '_', ($solution_files_row->filename)));
           //$zip->addFile($root_path. $LAB_PATH . $EXP_PATH . $CODE_PATH . $solution_files_row->filename);
           // var_dump($zip->numFiles);
         }
@@ -1073,18 +1157,23 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
     $zip_file_count = $zip->numFiles;
     //  var_dump($zip_file_count);die;
     $zip->close();
+// var_dump($user->uid);die;
     if ($zip_file_count > 0) {
       if ($user->uid) {
+        
         /* download zip file */
         header('Content-Type: application/zip');
         header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $lab_data->lab_title) . '.zip"');
         header('Content-Length: ' . filesize($zip_filename));
         ob_clean();
-        //flush();
+        flush();
         readfile($zip_filename);
         unlink($zip_filename);
+        // die;
       }
+
       else {
+        // var_dump("hii");die;
         header('Content-Type: application/zip');
         header('Content-disposition: attachment; filename="' . str_replace(' ', '_', $lab_data->lab_title) . '.zip"');
         header('Content-Length: ' . filesize($zip_filename));
@@ -1096,14 +1185,15 @@ $root_path = \Drupal::service("lab_migration_global")->lab_migration_path();
         flush();
         readfile($zip_filename);
         unlink($zip_filename);
+        // die;
       }
     }
     else {
       \Drupal::messenger()->addMessage("There are no solutions in this Lab to download", 'error');
-      // RedirectResponse('lab-migration/lab-migration-run');
+//       // RedirectResponse('lab-migration/lab-migration-run');
       $url = Url::fromRoute('lab_migration.run_form')->toString();
 
-// Return the RedirectResponse.
+// // Return the RedirectResponse.
 return new RedirectResponse($url);
 
   };}
@@ -1753,12 +1843,12 @@ public function lab_migration_download_syllabus_copy() {
       ),
       '#required' => TRUE,
     );
-    // $form['freecad_version'] = array(
-    //   '#type' => 'select',
-    //   '#title' => t('R version used'),
-    //   '#options' => _lm_list_of_software_version(),
-    //   '#required' => TRUE,
-    // );
+    $form['dwsim_version'] = [
+      '#type' => 'select',
+      '#title' => t('R version used'),
+      '#options' => _lm_list_of_software_version(),
+      '#required' => TRUE,
+    ];
     $form['toolbox_used'] = array(
       '#type' => 'hidden',
       '#title' => t('Toolbox used (If any)'),

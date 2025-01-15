@@ -22,6 +22,8 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Mail\MailManager;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+
 class LabMigrationProposalForm extends FormBase {
 
   /**
@@ -261,13 +263,13 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
       '#markup' => '<hr>',
     ];
     
-//     $form['version'] = [
-//       '#type' => 'select',
-//       // '#attributes' => array('class' => array('form-control')),
-// '#title' => $this->t('version'),
-//       '#options' =>\Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
-//       '#required' => TRUE,
-//     ];
+    $form['version'] = [
+      '#type' => 'select',
+      // '#attributes' => array('class' => array('form-control')),
+'#title' => $this->t('DWSIM Version'),
+      '#options' =>\Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
+      '#required' => TRUE,
+    ];
     $form['older'] = [
       '#type' => 'textfield',
       '#size' => 30,
@@ -439,9 +441,9 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
 
     if (isset($_FILES['files'])) {
       /* check if atleast one source or result file is uploaded */
-      if (!($_FILES['files']['name']['syllabus_copy_file'])) {
-        $form_state->setErrorByName('syllabus_copy_file', $this->t('Please upload pdf file.'));
-      }
+      // if (!($_FILES['files']['name']['syllabus_copy_file'])) {
+      //   $form_state->setErrorByName('syllabus_copy_file', $this->t('Please upload pdf file.'));
+      // }
       /* check for valid filename extensions */
       foreach ($_FILES['files']['name'] as $file_form_name => $file_name) {
         if ($file_name) {
@@ -480,8 +482,10 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
   }
 
   public function submitForm(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
-    $user = currentUser();
-        if (!$user->id()) {
+    $user = \Drupal::currentUser();  
+    // $user = $this->currentUser->id();
+     
+     if (!$user->id()) {
       \Drupal::messenger()->addmessage('It is mandatory to login on this website to access the proposal form');
       return;
     }
@@ -492,7 +496,6 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     $solution_provider_contact_ph = '';
     $solution_provider_department = '';
     $solution_provider_university = '';
-    $syllabus_copy_file_path = '';
     if ($form_state->getValue(['solution_provider_uid']) == "1") {
       $solution_provider_uid = $user->get('uid')->value;
       $solution_status = 1;
@@ -522,11 +525,11 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     $university = $v['university'];
     $directory_name = \Drupal::service("lab_migration_global")->_lm_dir_name($lab_title, $proposar_name, $university);
     $result = "INSERT INTO {lab_migration_proposal} 
-    (uid, approver_uid, name_title, name, contact_ph, department, university, city, pincode, state, country, operating_system, version, syllabus_link, lab_title, approval_status, solution_status, solution_provider_uid, solution_display, creation_date, approval_date, solution_date, solution_provider_name_title, solution_provider_name, solution_provider_contact_ph, solution_provider_department, solution_provider_university, directory_name,syllabus_copy_file_path) VALUES
+    (uid, approver_uid, name_title, name, contact_ph, department, university, city, pincode, state, country, operating_system, version, lab_title, approval_status, solution_status, solution_provider_uid, solution_display, creation_date, approval_date, solution_date, solution_provider_name_title, solution_provider_name, solution_provider_contact_ph, solution_provider_department, solution_provider_university, directory_name,) VALUES
     (:uid, :approver_uid, :name_title, :name, :contact_ph, :department, :university, :city, :pincode, :state, :country, :operating_system, 
-     :version, :syllabus_link, :lab_title, :approval_status, :solution_status, :solution_provider_uid, :solution_display, :creation_date, 
+     :version, :lab_title, :approval_status, :solution_status, :solution_provider_uid, :solution_display, :creation_date, 
      :approval_date, :solution_date, :solution_provider_name_title, :solution_provider_name,
-      :solution_provider_contact_ph, :solution_provider_department, :solution_provider_university, :directory_name,:syllabus_copy_file_path)";
+      :solution_provider_contact_ph, :solution_provider_department, :solution_provider_university, :directory_name,)";
    $args = [
     'uid' => $user->get('uid')->value,
     'approver_uid' => 0,
@@ -539,9 +542,8 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     'pincode' => $v['pincode'],
     'state' => $v['all_state'],
     'country' => $v['country'],
-    'operating_system' => $v['operating_system'],
-    // 'version' => $form_state->getValue(['version']),
-    'syllabus_link' => $v['syllabus_link'],
+    // 'operating_system' => $v['operating_system'],
+    'version' => $form_state->getValue(['version']),
     'lab_title' => $v['lab_title'],
     'approval_status' => 0,
     'solution_status' => $solution_status,
@@ -556,7 +558,6 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     'solution_provider_department' => $solution_provider_department,
     'solution_provider_university' => $solution_provider_university,
     'directory_name' => $directory_name,
-    'syllabus_copy_file_path' => "",
   ];
     
     // $connection = \Drupal::database();
@@ -583,18 +584,18 @@ $proposal_id= $connection->insert('lab_migration_proposal')->fields($args)->exec
           return;
         } //file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
             /* uploading file */
-        if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
-          $query = "UPDATE {lab_migration_proposal} SET syllabus_copy_file_path = :syllabus_copy_file_path WHERE id = :id";
-          $args = [
-            ":syllabus_copy_file_path" => $dest_path . $_FILES['files']['name'][$file_form_name],
-            ":id" => $proposal_id,
-          ];
-          $updateresult = \Drupal::database()->query($query, $args);
-          \Drupal::messenger()->addStatus($file_name . ' uploaded successfully.');
-        } //move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
-        else {
-          \Drupal::messenger()->addError('Error uploading file : ' . $dest_path . '/' . $file_name);
-        }
+        // if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
+        //   $query = "UPDATE {lab_migration_proposal} SET syllabus_copy_file_path = :syllabus_copy_file_path WHERE id = :id";
+        //   $args = [
+        //     ":syllabus_copy_file_path" => $dest_path . $_FILES['files']['name'][$file_form_name],
+        //     ":id" => $proposal_id,
+        //   ];
+        //   $updateresult = \Drupal::database()->query($query, $args);
+        //   \Drupal::messenger()->addStatus($file_name . ' uploaded successfully.');
+        // } //move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])
+        // else {
+        //   \Drupal::messenger()->addError('Error uploading file : ' . $dest_path . '/' . $file_name);
+        // }
       } //$file_name
     } //$_FILES['files']['name'] as $file_form_name => $file_name
     if (!$proposal_id) {

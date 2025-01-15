@@ -16,7 +16,7 @@ use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\RendererInterface;
-
+use ZipArchieve;
 
 class LabMigrationRunForm extends FormBase {
 
@@ -133,15 +133,16 @@ class LabMigrationRunForm extends FormBase {
       //           $response->addCommand(new HtmlCommand('#ajax_selected_lab_experiment_solution_action', \Drupal::service('renderer')->render($form['lab_experiment_solution_actions'])));
       // $solution_list_default_value = $form_state->getValue('lab_solution_list');      
         // Query solution files
+        // var_dump($solution_list_q);
       $query = \Drupal::database()->select('lab_migration_solution_files', 's');
       $query->fields('s');
-      $query->condition('solution_id', $form_state->getValue('solution_list'));
+      $query->condition('solution_id', 19);
       $solution_list_q = $query->execute();
       if ($solution_list_q) {
         $solution_files_rows = [];
         while ($solution_list_data = $solution_list_q->fetchObject()) {
  
-//var_dump($solution_list_data);die;
+// var_dump($solution_list_data);die;
           $solution_file_type = '';
           switch ($solution_list_data->filetype) {
             case 'S':
@@ -159,13 +160,15 @@ class LabMigrationRunForm extends FormBase {
           }
         
           // Create file download link
-          $items = [
-           
-             Link::fromTextAndUrl($solution_list_data->filename, Url::fromUri('internal:/lab-migration/download/file/' . $solution_list_data->id))->toString(),
-            "{$solution_file_type}"
-          ];
+          
         }
       }
+      $items = [
+           
+      //   Link::fromTextAndUrl($solution_list_data->filename, Url::fromUri('internal:/lab-migration/download/file/' . $solution_list_data->id))->toString(),
+      //  "{$solution_file_type}"
+      $solution_list_data->filename
+     ];
       array_push($solution_files_rows, $items);
       //var_dump($solution_rows);die;
         $form['download_solution_wrapper']['solution_files'] = [
@@ -398,7 +401,7 @@ public function _ajax_get_experiment_list($lab_default_value = '')
     return $experiments;
   }
   public function _ajax_get_solution_list($lab_experiment_list = '') {
-    
+    // var_dump("Hii");
     $solutions = [
       '0' => t('Please select...'),
     ];

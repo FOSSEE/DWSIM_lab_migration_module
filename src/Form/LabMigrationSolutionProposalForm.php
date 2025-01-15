@@ -344,7 +344,7 @@ return $response;
       "solution_provider_pincode" => $form_state->getValue(['pincode']),
       "solution_provider_state" => $form_state->getValue(['all_state']),
       "solution_provider_country" => $form_state->getValue(['country']),
-      "freecad_version" => $form_state->getValue(['version']),
+      "dwsim_version" => $form_state->getValue(['version']),
       "proposal_id" => $proposal_id,
     ];
 
