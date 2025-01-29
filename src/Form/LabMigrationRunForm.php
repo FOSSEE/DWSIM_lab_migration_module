@@ -128,22 +128,18 @@ class LabMigrationRunForm extends FormBase {
           '#type' => 'item',
           '#markup' => Link::fromTextAndUrl('Download Solution', Url::fromUri('internal:/lab-migration/download/solution/' . $form_state->getValue('solution_list')))->toString()
         ];
-      //   if ($solution_list_default_value != 0) {
-      //     //       // Render experiment solution actions
-      //           $response->addCommand(new HtmlCommand('#ajax_selected_lab_experiment_solution_action', \Drupal::service('renderer')->render($form['lab_experiment_solution_actions'])));
-      // $solution_list_default_value = $form_state->getValue('lab_solution_list');      
-        // Query solution files
-        // var_dump($solution_list_q);
-      $query = \Drupal::database()->select('lab_migration_solution_files', 's');
+     
+$query = \Drupal::database()->select('lab_migration_solution_files', 's');
       $query->fields('s');
-      $query->condition('solution_id', 19);
+      $query->condition('solution_id', $form_state->getValue('solution_list'));
       $solution_list_q = $query->execute();
       if ($solution_list_q) {
         $solution_files_rows = [];
         while ($solution_list_data = $solution_list_q->fetchObject()) {
  
-// var_dump($solution_list_data);die;
-          $solution_file_type = '';
+//var_dump($solution_list_data);die;
+          // $solution_file_type = [];
+          // var_dump($solution_list_data->filetype);die;
           switch ($solution_list_data->filetype) {
             case 'S':
               $solution_file_type = 'Source or Main file';
@@ -160,15 +156,13 @@ class LabMigrationRunForm extends FormBase {
           }
         
           // Create file download link
-          
+          $items = [
+           
+             Link::fromTextAndUrl($solution_list_data->filename, Url::fromUri('internal:/lab-migration/download/file/' . $solution_list_data->id))->toString(),
+            "{$solution_file_type}"
+          ];
         }
       }
-      $items = [
-           
-      //   Link::fromTextAndUrl($solution_list_data->filename, Url::fromUri('internal:/lab-migration/download/file/' . $solution_list_data->id))->toString(),
-      //  "{$solution_file_type}"
-      $solution_list_data->filename
-     ];
       array_push($solution_files_rows, $items);
       //var_dump($solution_rows);die;
         $form['download_solution_wrapper']['solution_files'] = [
@@ -189,6 +183,7 @@ class LabMigrationRunForm extends FormBase {
       ];
             // Add the table to the fieldset
 $form['download_solution_wrapper']['solution_files']['table'] = $table;
+        
         
       
         
