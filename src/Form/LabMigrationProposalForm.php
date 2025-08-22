@@ -22,7 +22,7 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Mail\MailManager;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerInterface;
-use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\user\Entity\User;
 
 class LabMigrationProposalForm extends FormBase {
 
@@ -497,7 +497,8 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
     $solution_provider_department = '';
     $solution_provider_university = '';
     if ($form_state->getValue(['solution_provider_uid']) == "1") {
-      $solution_provider_uid = $user->get('uid')->value;
+      // $solution_provider_uid = $user->get('uid')->value;
+      $solution_provider_uid =$user->id();
       $solution_status = 1;
       $solution_provider_name_title = $form_state->getValue(['name_title']);
       $solution_provider_name = $form_state->getValue(['name']);
@@ -531,7 +532,8 @@ $response = new RedirectResponse(Url::fromRoute('<front>')->toString());
      :approval_date, :solution_date, :solution_provider_name_title, :solution_provider_name,
       :solution_provider_contact_ph, :solution_provider_department, :solution_provider_university, :directory_name,)";
    $args = [
-    'uid' => $user->get('uid')->value,
+    // 'uid' => $user->get('uid')->value,
+    'uid' => $user->id(),
     'approver_uid' => 0,
     'name_title' => $v['name_title'],
     'name' => $v['name'],

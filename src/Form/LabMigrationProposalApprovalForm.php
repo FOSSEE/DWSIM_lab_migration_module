@@ -80,6 +80,7 @@ $proposal_id = (int) $route_match->getParameter('id');
       '#type' => 'item',
       // '#markup' => loadMultiple($proposal_data->uid)->mail,
       // '#markup' => User::load($proposal_data->uid)->getEmail(),
+      '#markup' => \Drupal\user\Entity\User::load($proposal_data->uid)->getEmail(),
 
       '#title' => t('Email'),
     ];
@@ -118,22 +119,22 @@ $proposal_id = (int) $route_match->getParameter('id');
       '#markup' => $proposal_data->pincode,
       '#title' => t('Pincode/Postal code'),
     ];
-    $form['operating_system'] = [
-      '#type' => 'item',
-      '#markup' => $proposal_data->operating_system,
-      '#title' => t('Operating System'),
-    ];
+    // $form['operating_system'] = [
+    //   '#type' => 'item',
+    //   '#markup' => $proposal_data->operating_system,
+    //   '#title' => t('Operating System'),
+    // ];
     // $form['version'] = [
     //   '#type' => 'item',
     //   // '#markup' => $proposal_data->version,
     //   '#markup' => isset($proposal_data->version) ? $proposal_data->version : $this->t('Not available'),
     //   '#title' =>$this-> t('Version'),
     // ];
-    $form['syllabus_link'] = [
-      '#type' => 'item',
-      '#markup' => $proposal_data->syllabus_link,
-      '#title' => t('Syllabus Link'),
-    ];
+    // $form['syllabus_link'] = [
+    //   '#type' => 'item',
+    //   '#markup' => $proposal_data->syllabus_link,
+    //   '#title' => t('Syllabus Link'),
+    // ];
     $form['lab_title'] = [
       '#type' => 'item',
       '#markup' => $proposal_data->lab_title,
@@ -156,17 +157,17 @@ $proposal_id = (int) $route_match->getParameter('id');
       '#markup' => $experiment_list,
       '#title' => t('Experiments'),
     ];
-    if ($proposal_data->syllabus_copy_file_path != "None") {
-      $form['syllabus_copy_file_path'] = [
-        '#type' => 'item',
-        // '#markup' => Link::fromTextAndUrl(t('Click here to download uploaded syllabus copy'), 'lab-migration/download/syllabus-copy-file/' . $proposal_id,$Url) ,
-      '#markup' => Link::fromTextAndUrl(
-  $this->t('Click here to download uploaded syllabus copy'),
-  Url::fromUri('internal:/lab-migration/download/syllabus-copy-file/' . $proposal_id)
-)->toString(),
-        // var_dump( $proposal_id );die;
-      ];
-    } //$row->samplefilepath != "None"
+//     if ($proposal_data->syllabus_copy_file_path != "None") {
+//       $form['syllabus_copy_file_path'] = [
+//         '#type' => 'item',
+//         // '#markup' => Link::fromTextAndUrl(t('Click here to download uploaded syllabus copy'), 'lab-migration/download/syllabus-copy-file/' . $proposal_id,$Url) ,
+//       '#markup' => Link::fromTextAndUrl(
+//   $this->t('Click here to download uploaded syllabus copy'),
+//   Url::fromUri('internal:/lab-migration/download/syllabus-copy-file/' . $proposal_id)
+// )->toString(),
+//         // var_dump( $proposal_id );die;
+//       ];
+//     } //$row->samplefilepath != "None"
     if ($proposal_data->solution_provider_uid == 0) {
       $solution_provider = "User will not provide solution, we will have to provide solution";
     }

@@ -204,22 +204,22 @@ return new RedirectResponse('/lab-migration/manage-proposal/pending');
         'placeholder' => 'Insert pincode of your city/ village....'
         ],
     ];
-    $form['operating_system'] = [
-      '#type' => 'textfield',
-      '#default_value' => $proposal_data->operating_system,
-      '#title' => t('Operating System'),
-    ];
+    // $form['operating_system'] = [
+    //   '#type' => 'textfield',
+    //   '#default_value' => $proposal_data->operating_system,
+    //   '#title' => t('Operating System'),
+    // ];
     // $form['version'] = [
     //   '#type' => 'select',
     //   '#title' => t('R Version'),
     //   '#options' => \Drupal::service("lab_migration_global")->_lm_list_of_software_version(),
     //   '#default_value' => $proposal_data->version,
     // ];
-    $form['syllabus_link'] = [
-      '#type' => 'item',
-      '#markup' => $proposal_data->syllabus_link,
-      '#title' => t('Syllabus Link'),
-    ];
+    // $form['syllabus_link'] = [
+    //   '#type' => 'item',
+    //   '#markup' => $proposal_data->syllabus_link,
+    //   '#title' => t('Syllabus Link'),
+    // ];
     $form['lab_title'] = [
       '#type' => 'textfield',
       '#title' => t('Title of the Lab'),
@@ -384,7 +384,7 @@ $proposal_id = (int) $route_match->getParameter('id');
     // $proposal_id = (int) arg(3);
     $route_match = \Drupal::routeMatch();
 
-$proposal_id = (int) $route_match->getParameter('id');
+$proposal_id = (int) $route_match->getParameter('proposal_id');
     // $proposal_q = \Drupal::database()->query("SELECT * FROM {lab_migration_proposal} WHERE id = %d", $proposal_id);
     $query = \Drupal::database()->select('lab_migration_proposal');
     $query->fields('lab_migration_proposal');

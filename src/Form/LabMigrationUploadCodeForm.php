@@ -143,7 +143,8 @@ $response->send();
     ];
     $form['code_warning'] = [
       '#type' => 'item',
-      '#title' => t('Upload all the r project files in .zip format'),
+      // '#title' => t('Upload all the r project files in .zip format'),
+      '#title' => t('Upload all the dwsim project files in .dwxml/dwxmz format'),
       '#prefix' => '<div style="color:red">',
       '#suffix' => '</div>',
     ];
@@ -462,7 +463,7 @@ $response->send();
     /* creating file path */
     $file_path = 'EXP' . $experiment_data->number . '/' . 'CODE' . $experiment_data->number . '.' . $form_state->getValue(['code_number']) . '/';
     /* creating solution database entry */
-    $query = "INSERT INTO {lab_migration_solution} (experiment_id, approver_uid, code_number, caption, approval_date, approval_status, timestamp, os_used, version, toolbox_used) VALUES (:experiment_id, :approver_uid, :code_number, :caption, :approval_date, :approval_status, :timestamp, :os_used, :version, :toolbox_used)";
+    $query = "INSERT INTO {lab_migration_solution} (experiment_id, approver_uid, code_number, caption, approval_date, approval_status, timestamp, os_used, dwsim_version, toolbox_used) VALUES (:experiment_id, :approver_uid, :code_number, :caption, :approval_date, :approval_status, :timestamp, :os_used, :dwsim_version, :toolbox_used)";
     $args = [
       ":experiment_id" => $experiment_id,
       ":approver_uid" => 0,
@@ -472,7 +473,8 @@ $response->send();
       ":approval_status" => 0,
       ":timestamp" => time(),
       ":os_used" => $form_state->getValue(['os_used']),
-      ":version" => $form_state->getValue(['version']),
+      // ":dwsim_version" => $form_state->getValue(['dwsim_version']),
+      ":dwsim_version" => $form_state->getValue('dwsim_version') ?? '',
       ":toolbox_used" => $form_state->getValue(['toolbox_used']),
     ];
     $solution_id = \Drupal::database()->query($query, $args, [
@@ -498,6 +500,27 @@ $response->send();
   }*/
 
     /* uploading files */
+    foreach ($form_state->getValue('uploaded_files') as $file) {
+      $fid = $file['fid'];
+      $file_entity = \Drupal\file\Entity\File::load($fid);
+    
+      if ($file_entity) {
+        // Mark file as permanent.
+        $file_entity->setPermanent();
+        $file_entity->save();
+    
+        // Save into your custom table.
+        \Drupal::database()->insert('lab_migration_solution_files')
+          ->fields([
+            'solution_id' => $solution_id,
+            'filename' => $file_entity->getFilename(),
+            'uri' => $file_entity->getFileUri(),
+            'filetype' => 'S', // Or R/X depending on your form input
+          ])
+          ->execute();
+      }
+    }
+    
     foreach ($_FILES['files']['name'] as $file_form_name => $file_name) {
       if ($file_name) {
         /* checking file type */
@@ -550,25 +573,25 @@ $response->send();
     \Drupal::messenger()->addmessage('Solution uploaded successfully.', 'status');
 
     /* sending email */
-    $email_to = $user->mail;
-    $from = $this->configFactory->get('lab_migration.settings')->get('lab_migration_from_email');
-    // $from = $config->get('lab_migration_from_email', '');
-    // $bcc = $config->get('lab_migration_emails', '');
-    $bcc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_email');
-    $cc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_cc_email');
+    // $email_to = $user->mail;
+    // $from = $this->configFactory->get('lab_migration.settings')->get('lab_migration_from_email');
+    // // $from = $config->get('lab_migration_from_email', '');
+    // // $bcc = $config->get('lab_migration_emails', '');
+    // $bcc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_email');
+    // $cc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_cc_email');
 
-    // $cc = $config->get('lab_migration_cc_emails', '');
-    $param['solution_uploaded']['solution_id'] = $solution_id;
-    $param['solution_uploaded']['user_id'] = $user->uid;
-    $param['solution_uploaded']['headers'] = [
-      'From' => $from,
-      'MIME-Version' => '1.0',
-      'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-      'Content-Transfer-Encoding' => '8Bit',
-      'X-Mailer' => 'Drupal',
-      'Cc' => $cc,
-      'Bcc' => $bcc,
-    ];
+    // // $cc = $config->get('lab_migration_cc_emails', '');
+    // $param['solution_uploaded']['solution_id'] = $solution_id;
+    // $param['solution_uploaded']['user_id'] = $user->uid;
+    // $param['solution_uploaded']['headers'] = [
+    //   'From' => $from,
+    //   'MIME-Version' => '1.0',
+    //   'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+    //   'Content-Transfer-Encoding' => '8Bit',
+    //   'X-Mailer' => 'Drupal',
+    //   'Cc' => $cc,
+    //   'Bcc' => $bcc,
+    // ];
 
     // if (!drupal_Email('lab_migration', 'solution_uploaded', $email_to, language_default(), $param, $from, TRUE)) {
     //   \Drupal::database()->addmessage('Error sending email message.', 'error');

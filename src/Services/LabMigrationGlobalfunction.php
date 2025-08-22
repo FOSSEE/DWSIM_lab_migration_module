@@ -903,7 +903,11 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   global $user;
 
   $root_path = lab_migration_path();
-  $solution_id = (int)arg(3);
+  // $solution_id = (int)arg(3);
+  $route_match = \Drupal::routeMatch();
+
+  $solution_id = (int) $route_match->getParameter('solution_id');
+  
 
   /* check solution */
  // $solution_q = db_query("SELECT * FROM {lab_migration_solution} WHERE id = %d LIMIT 1", $solution_id);
@@ -916,13 +920,13 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   if (!$solution_data)
   {
     \Drupal::messenger()->addMessage('Invalid solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
   if ($solution_data->approval_status != 0)
   {
     \Drupal::messenger()->addMessage('You cannnot delete a solution after it has been approved. Please contact site administrator if you want to delete this solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
 
@@ -937,7 +941,7 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   if (!$experiment_data)
   {
     \Drupal::messenger()->addMessage('You do not have permission to delete this solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
 
@@ -952,7 +956,7 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   if (!$proposal_data)
   {
     \Drupal::messenger()->addMessage('You do not have permission to delete this solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
 
@@ -984,7 +988,7 @@ public function lab_migration_with_morefeature($key, &$message, $params)
     \Drupal::messenger()->addMessage('Error deleting example.', 'status');
   }
 
-  drupal_goto('lab-migration/code');
+  // drupal_goto('lab-migration/code');
   return;
 }
 
