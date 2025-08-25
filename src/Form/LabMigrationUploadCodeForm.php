@@ -15,6 +15,9 @@ use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Database;
+use Drupal\file\Entity\File;
+
+
 
 
 class LabMigrationUploadCodeForm extends FormBase {
@@ -83,6 +86,7 @@ $response->send();
       '#title' => t('Proposer Name'),
     ];
 
+    // var_dump($proposal_data);die;
     /* get experiment list */
     $experiment_rows = [];
     //$experiment_q = \Drupal::database()->query("SELECT * FROM {lab_migration_experiment} WHERE proposal_id = %d ORDER BY id ASC", $proposal_data->id);
@@ -103,6 +107,7 @@ $response->send();
       '#size' => 1,
       '#required' => TRUE,
     ];
+    // var_dump($experiment_rows);die;
 // var_dump($form);die;
     $form['code_number'] = [
       '#type' => 'textfield',
@@ -112,12 +117,20 @@ $response->send();
       '#description' => t(""),
       '#required' => TRUE,
     ];
+    // $form['code_caption'] = [
+    //   '#type' => 'textfield',
+    //   '#title' => t('Caption'),
+    //   '#size' => 40,
+    //   '#maxlength' => 255,
+    //   '#description' => t(''),
+    //   '#required' => TRUE,
+    // ];
     $form['code_caption'] = [
       '#type' => 'textfield',
       '#title' => t('Caption'),
+      '#description' => t('For eg: Shell & Tube Heat Exchanger Simulation'),
       '#size' => 40,
       '#maxlength' => 255,
-      '#description' => t(''),
       '#required' => TRUE,
     ];
     $form['os_used'] = [
@@ -315,6 +328,7 @@ $form['cancel_link'] = [
               }
             }
           }
+          // var_dump($file_name);die;
           $config = $this->config('lab_migration.settings');
           $allowed_extensions_str = '';
           switch ($file_type) {
@@ -381,227 +395,392 @@ $form['cancel_link'] = [
   }
 }
 
-  public function submitForm(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
-    $user = \Drupal::currentUser();
+//   public function submitForm(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+//     $user = \Drupal::currentUser();
 
-    $root_path =  \Drupal::service("lab_migration_global")->lab_migration_path();
+//     $root_path =  \Drupal::service("lab_migration_global")->lab_migration_path();
 
-    $proposal_data = \Drupal::service("lab_migration_global")->lab_migration_get_proposal();
-    if (!$proposal_data) {
-      // RedirectResponse('');
-      return new RedirectResponse(Url::fromRoute('lab_migration.proposal_form')->toString());
-      return;
-    }
+//     $proposal_data = \Drupal::service("lab_migration_global")->lab_migration_get_proposal();
+//     if (!$proposal_data) {
+//       // RedirectResponse('');
+//       return new RedirectResponse(Url::fromRoute('lab_migration.proposal_form')->toString());
+//       return;
+//     }
 
-    $proposal_id = $proposal_data->id;
-    $proposal_drectory = $proposal_data->directory_name;
+//     $proposal_id = $proposal_data->id;
+//     $proposal_drectory = $proposal_data->directory_name;
 
-    /************************ check experiment details ************************/
-    $experiment_id = (int) $form_state->getValue(['experiment']);
-    //$experiment_q = \Drupal::database()->query("SELECT * FROM {lab_migration_experiment} WHERE id = %d AND proposal_id = %d LIMIT 1", $experiment_id, $proposal_id);
-    $query = \Drupal::database()->select('lab_migration_experiment');
-    $query->fields('lab_migration_experiment');
-    $query->condition('id', $experiment_id);
-    $query->condition('proposal_id', $proposal_id);
-    $query->range(0, 1);
-    $experiment_q = $query->execute();
-    $experiment_data = $experiment_q->fetchObject();
-    if (!$experiment_data) {
-      \Drupal::messenger()->addmessage("Invalid experiment seleted", 'error');
-      // RedirectResponse('lab-migration/code');
-      $response = new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
-$response->send();
-    }
+//     /************************ check experiment details ************************/
+//     $experiment_id = (int) $form_state->getValue(['experiment']);
+//     //$experiment_q = \Drupal::database()->query("SELECT * FROM {lab_migration_experiment} WHERE id = %d AND proposal_id = %d LIMIT 1", $experiment_id, $proposal_id);
+//     $query = \Drupal::database()->select('lab_migration_experiment');
+//     $query->fields('lab_migration_experiment');
+//     $query->condition('id', $experiment_id);
+//     $query->condition('proposal_id', $proposal_id);
+//     $query->range(0, 1);
+//     $experiment_q = $query->execute();
+//     $experiment_data = $experiment_q->fetchObject();
+//     if (!$experiment_data) {
+//       \Drupal::messenger()->addmessage("Invalid experiment seleted", 'error');
+//       // RedirectResponse('lab-migration/code');
+//       $response = new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
+// $response->send();
+//     }
 
-    /* create proposal folder if not present */
-    $dest_path = $proposal_drectory . '/';
-    if (!is_dir($root_path . $dest_path)) {
-      mkdir($root_path . $dest_path);
-    }
+//     /* create proposal folder if not present */
+//     $dest_path = $proposal_drectory . '/';
+//     if (!is_dir($root_path . $dest_path)) {
+//       mkdir($root_path . $dest_path);
+//     }
 
-    /*  get solution details - dont allow if already solution present */
-    $code_number = $experiment_data->number . '.' . $form_state->getValue(['code_number']);
+//     /*  get solution details - dont allow if already solution present */
+//     $code_number = $experiment_data->number . '.' . $form_state->getValue(['code_number']);
 
-    //$cur_solution_q = \Drupal::database()->query("SELECT * FROM {lab_migration_solution} WHERE experiment_id = %d AND code_number = '%s'", $experiment_id, $experiment_data->number . '.' . $form_state['values']['code_number']);
-    $query = \Drupal::database()->select('lab_migration_solution');
-    $query->fields('lab_migration_solution');
-    $query->condition('experiment_id', $experiment_id);
-    $query->condition('code_number', $code_number);
-    $cur_solution_q = $query->execute();
-    if ($cur_solution_d = $cur_solution_q->fetchObject()) {
-      if ($cur_solution_d->approval_status == 1) {
-        \Drupal::messenger()->addmessage(t("Solution already approved. Cannot overwrite it."), 'error');
-        // RedirectResponse('lab-migration/code');
-        return;
-      }
-      else {
-        if ($cur_solution_d->approval_status == 0) {
-          \Drupal::messenger()->addmessage(t("Solution is under pending review. Delete the solution and reupload it."), 'error');
-          // RedirectResponse('lab-migration/code');
-          return new RedirectResponse(Url::fromUserInput('/lab-migration/code')->toString());
-          return;
-        }
-        else {
-          \Drupal::messenger()->addmessage(t("Error uploading solution. Please contact administrator."), 'error');
-          RedirectResponse('lab-migration/code');
-          return;
-        }
-      }
-    }
+//     //$cur_solution_q = \Drupal::database()->query("SELECT * FROM {lab_migration_solution} WHERE experiment_id = %d AND code_number = '%s'", $experiment_id, $experiment_data->number . '.' . $form_state['values']['code_number']);
+//     $query = \Drupal::database()->select('lab_migration_solution');
+//     $query->fields('lab_migration_solution');
+//     $query->condition('experiment_id', $experiment_id);
+//     $query->condition('code_number', $code_number);
+//     $cur_solution_q = $query->execute();
+//     if ($cur_solution_d = $cur_solution_q->fetchObject()) {
+//       if ($cur_solution_d->approval_status == 1) {
+//         \Drupal::messenger()->addmessage(t("Solution already approved. Cannot overwrite it."), 'error');
+//         // RedirectResponse('lab-migration/code');
+//         return;
+//       }
+//       else {
+//         if ($cur_solution_d->approval_status == 0) {
+//           \Drupal::messenger()->addmessage(t("Solution is under pending review. Delete the solution and reupload it."), 'error');
+//           // RedirectResponse('lab-migration/code');
+//           return new RedirectResponse(Url::fromUserInput('/lab-migration/code')->toString());
+//           return;
+//         }
+//         else {
+//           \Drupal::messenger()->addmessage(t("Error uploading solution. Please contact administrator."), 'error');
+//           RedirectResponse('lab-migration/code');
+//           return;
+//         }
+//       }
+//     }
 
-    /* creating experiment directories */
-    $dest_path .= 'EXP' . $experiment_data->number . '/';
-    if (!is_dir($root_path . $dest_path)) {
-      mkdir($root_path . $dest_path);
-    }
+//     /* creating experiment directories */
+//     $dest_path .= 'EXP' . $experiment_data->number . '/';
+//     if (!is_dir($root_path . $dest_path)) {
+//       mkdir($root_path . $dest_path);
+//     }
 
-    /* creating code directories */
-    $dest_path .= 'CODE' . $experiment_data->number . '.' . $form_state->getValue(['code_number']) . '/';
-    if (!is_dir($root_path . $dest_path)) {
-      mkdir($root_path . $dest_path);
-    }
-    /* creating file path */
-    $file_path = 'EXP' . $experiment_data->number . '/' . 'CODE' . $experiment_data->number . '.' . $form_state->getValue(['code_number']) . '/';
-    /* creating solution database entry */
-    $query = "INSERT INTO {lab_migration_solution} (experiment_id, approver_uid, code_number, caption, approval_date, approval_status, timestamp, os_used, dwsim_version, toolbox_used) VALUES (:experiment_id, :approver_uid, :code_number, :caption, :approval_date, :approval_status, :timestamp, :os_used, :dwsim_version, :toolbox_used)";
-    $args = [
-      ":experiment_id" => $experiment_id,
-      ":approver_uid" => 0,
-      ":code_number" => $experiment_data->number . '.' . $form_state->getValue(['code_number']),
-      ":caption" => $form_state->getValue(['code_caption']),
-      ":approval_date" => 0,
-      ":approval_status" => 0,
-      ":timestamp" => time(),
-      ":os_used" => $form_state->getValue(['os_used']),
-      // ":dwsim_version" => $form_state->getValue(['dwsim_version']),
-      ":dwsim_version" => $form_state->getValue('dwsim_version') ?? '',
-      ":toolbox_used" => $form_state->getValue(['toolbox_used']),
-    ];
-    $solution_id = \Drupal::database()->query($query, $args, [
-      'return' => Database::RETURN_INSERT_ID
-      ]);
-    // var_dump('solution id= '.$solution_id.  '&&& dep file = '.array_filter($form_state['values']['existing_depfile']['dep_experiment_files']));
+//     /* creating code directories */
+//     $dest_path .= 'CODE' . $experiment_data->number . '.' . $form_state->getValue(['code_number']) . '/';
+//     if (!is_dir($root_path . $dest_path)) {
+//       mkdir($root_path . $dest_path);
+//     }
+//     /* creating file path */
+//     $file_path = 'EXP' . $experiment_data->number . '/' . 'CODE' . $experiment_data->number . '.' . $form_state->getValue(['code_number']) . '/';
+//     /* creating solution database entry */
+//     $query = "INSERT INTO {lab_migration_solution} (experiment_id, approver_uid, code_number, caption, approval_date, approval_status, timestamp, os_used, dwsim_version, toolbox_used) VALUES (:experiment_id, :approver_uid, :code_number, :caption, :approval_date, :approval_status, :timestamp, :os_used, :dwsim_version, :toolbox_used)";
+//     $args = [
+//       ":experiment_id" => $experiment_id,
+//       ":approver_uid" => 0,
+//       ":code_number" => $experiment_data->number . '.' . $form_state->getValue(['code_number']),
+//       ":caption" => $form_state->getValue(['code_caption']),
+//       ":approval_date" => 0,
+//       ":approval_status" => 0,
+//       ":timestamp" => time(),
+//       ":os_used" => $form_state->getValue(['os_used']),
+//       // ":dwsim_version" => $form_state->getValue(['dwsim_version']),
+//       ":dwsim_version" => $form_state->getValue('dwsim_version') ?? '',
+//       ":toolbox_used" => $form_state->getValue(['toolbox_used']),
+//     ];
+//     $solution_id = \Drupal::database()->query($query, $args, [
+//       'return' => Database::RETURN_INSERT_ID
+//       ]);
+//     // var_dump('solution id= '.$solution_id.  '&&& dep file = '.array_filter($form_state['values']['existing_depfile']['dep_experiment_files']));
 
-    //die;
-  /* linking existing dependencies */
-    /* foreach ($form_state['values']['existing_depfile']['dep_experiment_files'] as $row)
-  {
-    if ($row > 0)
-    {*/
-    /* insterting into database */
-    /* $query = "INSERT INTO {lab_migration_solution_dependency} (solution_id, dependency_id)
-        VALUES (:solution_id, :dependency_id)";
-      $args = array(
-                    ":solution_id" => $solution_id,
-                    ":dependency_id" => $row
-               );  
-      \Drupal::database()->query( $query,$args);
-    }
-  }*/
+//     //die;
+//   /* linking existing dependencies */
+//     /* foreach ($form_state['values']['existing_depfile']['dep_experiment_files'] as $row)
+//   {
+//     if ($row > 0)
+//     {*/
+//     /* insterting into database */
+//     /* $query = "INSERT INTO {lab_migration_solution_dependency} (solution_id, dependency_id)
+//         VALUES (:solution_id, :dependency_id)";
+//       $args = array(
+//                     ":solution_id" => $solution_id,
+//                     ":dependency_id" => $row
+//                );  
+//       \Drupal::database()->query( $query,$args);
+//     }
+//   }*/
 
-    /* uploading files */
-    foreach ($form_state->getValue('uploaded_files') as $file) {
-      $fid = $file['fid'];
-      $file_entity = \Drupal\file\Entity\File::load($fid);
+//     /* uploading files */
+//     foreach ($form_state->getValue('uploaded_files') as $file) {
+//       $fid = $file['fid'];
+//       $file_entity = \Drupal\file\Entity\File::load($fid);
     
-      if ($file_entity) {
-        // Mark file as permanent.
-        $file_entity->setPermanent();
-        $file_entity->save();
+//       if ($file_entity) {
+//         // Mark file as permanent.
+//         $file_entity->setPermanent();
+//         $file_entity->save();
     
-        // Save into your custom table.
-        \Drupal::database()->insert('lab_migration_solution_files')
-          ->fields([
-            'solution_id' => $solution_id,
-            'filename' => $file_entity->getFilename(),
-            'uri' => $file_entity->getFileUri(),
-            'filetype' => 'S', // Or R/X depending on your form input
-          ])
-          ->execute();
-      }
-    }
+//         // Save into your custom table.
+//         \Drupal::database()->insert('lab_migration_solution_files')
+//           ->fields([
+//             'solution_id' => $solution_id,
+//             'filename' => $file_entity->getFilename(),
+//             'uri' => $file_entity->getFileUri(),
+//             'filetype' => 'S', // Or R/X depending on your form input
+//           ])
+//           ->execute();
+//       }
+//     }
+
     
-    foreach ($_FILES['files']['name'] as $file_form_name => $file_name) {
-      if ($file_name) {
-        /* checking file type */
-        if (strstr($file_form_name, 'source')) {
-          $file_type = 'S';
-        }
-        else {
-          if (strstr($file_form_name, 'result')) {
-            $file_type = 'R';
-          }
-          else {
-            if (strstr($file_form_name, 'xcos')) {
-              $file_type = 'X';
-            }
-            else {
-              $file_type = 'U';
-            }
-          }
-        }
+//     foreach ($_FILES['files']['name'] as $file_form_name => $file_name) {
+//       if ($file_name) {
+//         /* checking file type */
+//         if (strstr($file_form_name, 'source')) {
+//           $file_type = 'S';
+//         }
+//         else {
+//           if (strstr($file_form_name, 'result')) {
+//             $file_type = 'R';
+//           }
+//           else {
+//             if (strstr($file_form_name, 'xcos')) {
+//               $file_type = 'X';
+//             }
+//             else {
+//               $file_type = 'U';
+//             }
+//           }
+//         }
 
-        if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
-          \Drupal::database()->addmessage(t("Error uploading file. File !filename already exists.", [
-            '!filename' => $_FILES['files']['name'][$file_form_name]
-            ]), 'error');
-          return;
-        }
+//         if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
+//           \Drupal::messanger()->addmessage(t("Error uploading file. File !filename already exists.", [
+//             '!filename' => $_FILES['files']['name'][$file_form_name]
+//             ]), 'error');
+//           return;
+//         }
 
-        /* uploading file */
-        if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
-          /* for uploaded files making an entry in the database */
-          $query = "INSERT INTO {lab_migration_solution_files} (solution_id, filename, filepath, filemime, filesize, filetype, timestamp)
-          VALUES (:solution_id, :filename, :filepath, :filemime, :filesize, :filetype, :timestamp)";
-          $args = [
-            ":solution_id" => $solution_id,
-            ":filename" => $_FILES['files']['name'][$file_form_name],
-            ":filepath" => $file_path . $_FILES['files']['name'][$file_form_name],
-            ":filemime" => mime_content_type($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]),
-            ":filesize" => $_FILES['files']['size'][$file_form_name],
-            ":filetype" => $file_type,
-            ":timestamp" => time(),
-          ];
-          \Drupal::database()->query($query, $args);
-          \Drupal::messenger()->addmessage($file_name . ' uploaded successfully.', 'status');
-        }
-        else {
-          \Drupal::messenger()->addmessage('Error uploading file: ' . $dest_path . $file_name, 'error');
-        }
-      }
-    }
-    \Drupal::messenger()->addmessage('Solution uploaded successfully.', 'status');
+//         /* uploading file */
+//         if (move_uploaded_file($_FILES['files']['tmp_name'][$file_form_name], $root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
+//           /* for uploaded files making an entry in the database */
+//           $query = "INSERT INTO {lab_migration_solution_files} (solution_id, filename, filepath, filemime, filesize, filetype, timestamp)
+//           VALUES (:solution_id, :filename, :filepath, :filemime, :filesize, :filetype, :timestamp)";
+//           $args = [
+//             ":solution_id" => $solution_id,
+//             ":filename" => $_FILES['files']['name'][$file_form_name],
+//             ":filepath" => $file_path . $_FILES['files']['name'][$file_form_name],
+//             ":filemime" => mime_content_type($root_path . $dest_path . $_FILES['files']['name'][$file_form_name]),
+//             ":filesize" => $_FILES['files']['size'][$file_form_name],
+//             ":filetype" => $file_type,
+//             ":timestamp" => time(),
+//           ];
+//           \Drupal::database()->query($query, $args);
+//           \Drupal::messenger()->addmessage($file_name . ' uploaded successfully.', 'status');
+//         }
+//         else {
+//           \Drupal::messenger()->addmessage('Error uploading file: ' . $dest_path . $file_name, 'error');
+//         }
+//       }
+//     }
+//     \Drupal::messenger()->addmessage('Solution uploaded successfully.', 'status');
 
-    /* sending email */
-    // $email_to = $user->mail;
-    // $from = $this->configFactory->get('lab_migration.settings')->get('lab_migration_from_email');
-    // // $from = $config->get('lab_migration_from_email', '');
-    // // $bcc = $config->get('lab_migration_emails', '');
-    // $bcc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_email');
-    // $cc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_cc_email');
+//     /* sending email */
+//     // $email_to = $user->mail;
+//     // $from = $this->configFactory->get('lab_migration.settings')->get('lab_migration_from_email');
+//     // // $from = $config->get('lab_migration_from_email', '');
+//     // // $bcc = $config->get('lab_migration_emails', '');
+//     // $bcc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_email');
+//     // $cc = $this->configFactory->get('lab_migration.settings')->get('lab_migration_cc_email');
 
-    // // $cc = $config->get('lab_migration_cc_emails', '');
-    // $param['solution_uploaded']['solution_id'] = $solution_id;
-    // $param['solution_uploaded']['user_id'] = $user->uid;
-    // $param['solution_uploaded']['headers'] = [
-    //   'From' => $from,
-    //   'MIME-Version' => '1.0',
-    //   'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-    //   'Content-Transfer-Encoding' => '8Bit',
-    //   'X-Mailer' => 'Drupal',
-    //   'Cc' => $cc,
-    //   'Bcc' => $bcc,
-    // ];
+//     // // $cc = $config->get('lab_migration_cc_emails', '');
+//     // $param['solution_uploaded']['solution_id'] = $solution_id;
+//     // $param['solution_uploaded']['user_id'] = $user->uid;
+//     // $param['solution_uploaded']['headers'] = [
+//     //   'From' => $from,
+//     //   'MIME-Version' => '1.0',
+//     //   'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+//     //   'Content-Transfer-Encoding' => '8Bit',
+//     //   'X-Mailer' => 'Drupal',
+//     //   'Cc' => $cc,
+//     //   'Bcc' => $bcc,
+//     // ];
 
-    // if (!drupal_Email('lab_migration', 'solution_uploaded', $email_to, language_default(), $param, $from, TRUE)) {
-    //   \Drupal::database()->addmessage('Error sending email message.', 'error');
-    // }
-    $response = new RedirectResponse(Url::fromRoute('lab_migration.upload_code_form')->toString());
-   // Send the redirect response
-      $response->send();
-      }
-    // RedirectResponse('lab-migration/code/upload');
+//     // if (!drupal_Email('lab_migration', 'solution_uploaded', $email_to, language_default(), $param, $from, TRUE)) {
+//     //   \Drupal::database()->addmessage('Error sending email message.', 'error');
+//     // }
+//     $response = new RedirectResponse(Url::fromRoute('lab_migration.upload_code_form')->toString());
+//    // Send the redirect response
+//       $response->send();
+//       }
+//     // RedirectResponse('lab-migration/code/upload');
+//   }
+
+public function submitForm(array &$form, FormStateInterface $form_state) {
+  $user = \Drupal::currentUser();
+
+  $root_path = \Drupal::service('lab_migration_global')->lab_migration_path();
+
+  $proposal_data = \Drupal::service('lab_migration_global')->lab_migration_get_proposal();
+  if (!$proposal_data) {
+    return new RedirectResponse(Url::fromRoute('<front>')->toString());
+  }
+// var_dump($proposal_data);die;
+  $proposal_id = $proposal_data->id;
+  $proposal_directory = $proposal_data->directory_name;
+
+  // Check experiment details.
+  $experiment_id = (int) $form_state->getValue('experiment');
+  $query = \Drupal::database()->select('lab_migration_experiment', 'e');
+  $query->fields('e');
+  $query->condition('id', $experiment_id);
+  $query->condition('proposal_id', $proposal_id);
+  $query->range(0, 1);
+  $experiment_data = $query->execute()->fetchObject();
+
+  // var_dump($experiment_id);die;
+  if (!$experiment_data) {
+    \Drupal::messenger()->addMessage("Invalid experiment selected", 'error');
+    return new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
   }
 
+  // Create directories.
+  $dest_path = $proposal_directory . '/';
+  if (!is_dir($root_path . $dest_path)) {
+    mkdir($root_path . $dest_path, 0775, TRUE);
+  }
+
+  $code_number = $experiment_data->number . '.' . $form_state->getValue('code_number');
+
+  // Check if solution already exists.
+  $query = \Drupal::database()->select('lab_migration_solution', 's');
+  $query->fields('s');
+  $query->condition('experiment_id', $experiment_id);
+  $query->condition('code_number', $code_number);
+  $cur_solution_d = $query->execute()->fetchObject();
+
+  if ($cur_solution_d) {
+    if ($cur_solution_d->approval_status == 1) {
+      \Drupal::messenger()->addMessage(t("Solution already approved. Cannot overwrite it."), 'error');
+      return new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
+    }
+    elseif ($cur_solution_d->approval_status == 0) {
+      \Drupal::messenger()->addMessage(t("Solution is under pending review. Delete the solution and reupload it."), 'error');
+      return new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
+    }
+    else {
+      \Drupal::messenger()->addMessage(t("Error uploading solution. Please contact administrator."), 'error');
+      return new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
+    }
+  }
+
+  // Create experiment directories.
+  $dest_path .= 'EXP' . $experiment_data->number . '/';
+  if (!is_dir($root_path . $dest_path)) {
+    mkdir($root_path . $dest_path, 0775, TRUE);
+  }
+
+  // Create code directories.
+  $dest_path .= 'CODE' . $experiment_data->number . '.' . $form_state->getValue('code_number') . '/';
+  if (!is_dir($root_path . $dest_path)) {
+    mkdir($root_path . $dest_path, 0775, TRUE);
+  }
+
+  $file_path = 'EXP' . $experiment_data->number . '/' . 'CODE' . $experiment_data->number . '.' . $form_state->getValue('code_number') . '/';
+
+  // Insert solution.
+  $query = "INSERT INTO {lab_migration_solution} 
+    (experiment_id, approver_uid, code_number, caption, approval_date, approval_status, timestamp, os_used, dwsim_version, toolbox_used) 
+    VALUES (:experiment_id, :approver_uid, :code_number, :caption, :approval_date, :approval_status, :timestamp, :os_used, :dwsim_version, :toolbox_used)";
+  $args = [
+    ":experiment_id" => $experiment_id,
+    ":approver_uid" => 0,
+    ":code_number" => $code_number,
+    ":caption" => $form_state->getValue('code_caption'),
+    ":approval_date" => 0,
+    ":approval_status" => 0,
+    ":timestamp" => time(),
+    ":os_used" => $form_state->getValue('os_used'),
+    // ":dwsim_version" => $form_state->getValue('dwsim_version'),
+          ":dwsim_version" => $form_state->getValue('dwsim_version') ?? '',
+
+    ":toolbox_used" => $form_state->getValue('toolbox_used'),
+  ];
+  $solution_id = \Drupal::database()->query($query, $args, ['return' => Database::RETURN_INSERT_ID]);
+
+  // Handle uploaded files (Drupal managed_file element).
+  $uploaded_files = $form_state->getValue('uploaded_files') ?? [];
+  foreach ($uploaded_files as $file) {
+    $fid = $file['fid'];
+    $file_entity = File::load($fid);
+
+    if ($file_entity) {
+      $file_entity->setPermanent();
+      $file_entity->save();
+
+      $filename = $file_entity->getFilename();
+      $uri = $file_entity->getFileUri();
+
+      // Detect type from filename.
+      if (strstr($filename, 'source')) {
+        $file_type = 'S';
+      }
+      elseif (strstr($filename, 'result')) {
+        $file_type = 'R';
+      }
+      elseif (strstr($filename, 'xcos')) {
+        $file_type = 'X';
+      }
+      else {
+        $file_type = 'U';
+      }
+
+      \Drupal::database()->insert('lab_migration_solution_files')
+        ->fields([
+          'solution_id' => $solution_id,
+          'filename' => $filename,
+          'uri' => $uri,
+          'filetype' => $file_type,
+          'timestamp' => time(),
+        ])
+        ->execute();
+
+      \Drupal::messenger()->addMessage($filename . ' uploaded successfully.', 'status');
+    }
+  }
+
+  \Drupal::messenger()->addMessage('Solution uploaded successfully.', 'status');
+
+  // // Send email.
+  // $from = \Drupal::config('lab_migration.settings')->get('lab_migration_from_email');
+  // $bcc = \Drupal::config('lab_migration.settings')->get('lab_migration_email');
+  // $cc = \Drupal::config('lab_migration.settings')->get('lab_migration_cc_email');
+
+  // $mailManager = \Drupal::service('plugin.manager.mail');
+  // $module = 'lab_migration';
+  // $key = 'solution_uploaded';
+  // $to = $user->getEmail();
+  // $langcode = $user->getPreferredLangcode();
+  // $params['solution_uploaded'] = [
+  //   'solution_id' => $solution_id,
+  //   'user_id' => $user->id(),
+  // ];
+  // $params['headers'] = [
+  //   'From' => $from,
+  //   'Cc' => $cc,
+  //   'Bcc' => $bcc,
+  // ];
+
+  // $result = $mailManager->mail($module, $key, $to, $langcode, $params, $from, TRUE);
+
+  if (!$result) {
+    \Drupal::messenger()->addMessage('Error sending email message.', 'error');
+  }
+
+  return new RedirectResponse(Url::fromRoute('lab_migration.list_experiments')->toString());
+}
+}
 
 ?>
