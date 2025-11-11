@@ -347,7 +347,7 @@ return new RedirectResponse('/lab-migration/manage-proposal/pending');
     $form['cancel'] = [
       '#type' => 'item',
       // '#markup' => Link::fromTextAndUrl(t('Cancel'), 'lab-migration/manage-proposal'),
-      '#markup' => Link::fromTextAndUrl(t('Cancel'), Url::fromRoute('lab_migration.proposal_all'))->toString(),
+      '#markup' => Link::fromTextAndUrl(t('Cancel'), Url::fromRoute('lab_migration.proposal_pending'))->toString(),
     ];
     return $form;
   }
@@ -625,7 +625,7 @@ $proposal_id = (int) $route_match->getParameter('proposal_id');
     }
     }*/
     \Drupal::messenger()->addmessage(t('Proposal Updated'), 'status');
-    $response = new RedirectResponse(Url::fromRoute('lab_migration.proposal_all')->toString());
+    $response = new RedirectResponse(Url::fromRoute('lab_migration.proposal_pending')->toString());
     // Send the redirect response
        $response->send();
        return;

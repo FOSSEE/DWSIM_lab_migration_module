@@ -837,28 +837,28 @@ public  function lab_migration_delete_experiment($experiment_id)
     $dir_path = $root_path . $proposal_data->directory_name . '/EXP' . $experiment_data->number . '/CODE' . $solution_data->code_number;
     if (is_dir($dir_path))
     {
-        if (!rmdir($dir_path))
-        {
-            \Drupal::messenger()->addMessage(t('Error deleting folder !folder', array('!folder' => $dir_path)), 'error');
+        // if (!rmdir($dir_path))
+        // {
+        //     \Drupal::messenger()->addMessage(t('Error deleting folder !folder', array('!folder' => $dir_path)), 'error');
 
           /* sending email to admins */
-            $email_to = variable_get('lab_migration_emails', '');
-            $from = variable_get('lab_migration_from_email', '');
-            $bcc="";
-            $cc=variable_get('lab_migration_cc_emails', '');
+          //   $email_to = variable_get('lab_migration_emails', '');
+          //   $from = variable_get('lab_migration_from_email', '');
+          //   $bcc="";
+          //   $cc=variable_get('lab_migration_cc_emails', '');
 
 
-            $param['standard']['subject'] = "[ERROR] Error deleting folder";
-            $param['standard']['body'] = "Error deleting folder " . $dir_path . " by " . $user->uid . " at " . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            $param['standard']['headers']=array('From'=>$from,'MIME-Version'=> '1.0',
-                        'Content-Type'=> 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-                        'Content-Transfer-Encoding' => '8Bit',
-                        'X-Mailer'=> 'Drupal','Cc' => $cc, 'Bcc' => $bcc);
+          //   $param['standard']['subject'] = "[ERROR] Error deleting folder";
+          //   $param['standard']['body'] = "Error deleting folder " . $dir_path . " by " . $user->uid . " at " . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+          //   $param['standard']['headers']=array('From'=>$from,'MIME-Version'=> '1.0',
+          //               'Content-Type'=> 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+          //               'Content-Transfer-Encoding' => '8Bit',
+          //               'X-Mailer'=> 'Drupal','Cc' => $cc, 'Bcc' => $bcc);
         
-            if (!drupal_mail('lab_migration', 'standard', $email_to, language_default(), $param, $from, TRUE))
-                \Drupal::messenger()->addMessage('Error sending email message.', 'error');
-          return FALSE;
-        }
+          //   if (!drupal_mail('lab_migration', 'standard', $email_to, language_default(), $param, $from, TRUE))
+          //       \Drupal::messenger()->addMessage('Error sending email message.', 'error');
+          // return FALSE;
+        // }
     } 
     else 
     {
