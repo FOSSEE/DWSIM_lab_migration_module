@@ -38,7 +38,7 @@ class LabMigrationUploadCodeForm extends FormBase {
     $proposal_data = \Drupal::service("lab_migration_global")->lab_migration_get_proposal();
     if (!$proposal_data) {
       // RedirectResponse('');
-      $response = new RedirectResponse(Url::fromRoute('lab_migration.proposal')->toString());
+      $response = new RedirectResponse(Url::fromRoute('lab_migration.proposal_form')->toString());
 $response->send();
       return;
       // var_dump($response);die;
