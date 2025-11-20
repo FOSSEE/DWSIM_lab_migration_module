@@ -17,7 +17,7 @@ lab_migration.solution_proposal_pending:
   defaults:
     _title: 'Pending Solution Proposals'
     _controller: '\Drupal\lab_migration\Controller\DefaultController::lab_migration_solution_proposal_pending'
-  requirements:
+  requirements: 
     _permission: 'lab migration manage proposal'
 lab_migration.proposal_pending_solution:
   path: /lab-migration/manage-proposal/pending-solution
