@@ -837,28 +837,28 @@ public  function lab_migration_delete_experiment($experiment_id)
     $dir_path = $root_path . $proposal_data->directory_name . '/EXP' . $experiment_data->number . '/CODE' . $solution_data->code_number;
     if (is_dir($dir_path))
     {
-        if (!rmdir($dir_path))
-        {
-            \Drupal::messenger()->addMessage(t('Error deleting folder !folder', array('!folder' => $dir_path)), 'error');
+        // if (!rmdir($dir_path))
+        // {
+        //     \Drupal::messenger()->addMessage(t('Error deleting folder !folder', array('!folder' => $dir_path)), 'error');
 
           /* sending email to admins */
-            $email_to = variable_get('lab_migration_emails', '');
-            $from = variable_get('lab_migration_from_email', '');
-            $bcc="";
-            $cc=variable_get('lab_migration_cc_emails', '');
+          //   $email_to = variable_get('lab_migration_emails', '');
+          //   $from = variable_get('lab_migration_from_email', '');
+          //   $bcc="";
+          //   $cc=variable_get('lab_migration_cc_emails', '');
 
 
-            $param['standard']['subject'] = "[ERROR] Error deleting folder";
-            $param['standard']['body'] = "Error deleting folder " . $dir_path . " by " . $user->uid . " at " . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            $param['standard']['headers']=array('From'=>$from,'MIME-Version'=> '1.0',
-                        'Content-Type'=> 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-                        'Content-Transfer-Encoding' => '8Bit',
-                        'X-Mailer'=> 'Drupal','Cc' => $cc, 'Bcc' => $bcc);
+          //   $param['standard']['subject'] = "[ERROR] Error deleting folder";
+          //   $param['standard']['body'] = "Error deleting folder " . $dir_path . " by " . $user->uid . " at " . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+          //   $param['standard']['headers']=array('From'=>$from,'MIME-Version'=> '1.0',
+          //               'Content-Type'=> 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+          //               'Content-Transfer-Encoding' => '8Bit',
+          //               'X-Mailer'=> 'Drupal','Cc' => $cc, 'Bcc' => $bcc);
         
-            if (!drupal_mail('lab_migration', 'standard', $email_to, language_default(), $param, $from, TRUE))
-                \Drupal::messenger()->addMessage('Error sending email message.', 'error');
-          return FALSE;
-        }
+          //   if (!drupal_mail('lab_migration', 'standard', $email_to, language_default(), $param, $from, TRUE))
+          //       \Drupal::messenger()->addMessage('Error sending email message.', 'error');
+          // return FALSE;
+        // }
     } 
     else 
     {
@@ -903,7 +903,11 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   global $user;
 
   $root_path = lab_migration_path();
-  $solution_id = (int)arg(3);
+  // $solution_id = (int)arg(3);
+  $route_match = \Drupal::routeMatch();
+
+  $solution_id = (int) $route_match->getParameter('solution_id');
+  
 
   /* check solution */
  // $solution_q = db_query("SELECT * FROM {lab_migration_solution} WHERE id = %d LIMIT 1", $solution_id);
@@ -916,13 +920,13 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   if (!$solution_data)
   {
     \Drupal::messenger()->addMessage('Invalid solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
   if ($solution_data->approval_status != 0)
   {
     \Drupal::messenger()->addMessage('You cannnot delete a solution after it has been approved. Please contact site administrator if you want to delete this solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
 
@@ -937,7 +941,7 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   if (!$experiment_data)
   {
     \Drupal::messenger()->addMessage('You do not have permission to delete this solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
 
@@ -952,7 +956,7 @@ public function lab_migration_with_morefeature($key, &$message, $params)
   if (!$proposal_data)
   {
     \Drupal::messenger()->addMessage('You do not have permission to delete this solution.', 'error');
-    drupal_goto('lab-migration/code');
+    // drupal_goto('lab-migration/code');
     return;
   }
 
@@ -984,7 +988,7 @@ public function lab_migration_with_morefeature($key, &$message, $params)
     \Drupal::messenger()->addMessage('Error deleting example.', 'status');
   }
 
-  drupal_goto('lab-migration/code');
+  // drupal_goto('lab-migration/code');
   return;
 }
 

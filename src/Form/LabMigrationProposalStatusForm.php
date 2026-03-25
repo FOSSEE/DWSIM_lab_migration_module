@@ -16,6 +16,10 @@ use Drupal\user\Entity\User;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
+use Drupal\Core\Mail\MailManager;
+use Drupal\Core\Mail\MailManagerInterface;
+
+
 
 class LabMigrationProposalStatusForm extends FormBase {
 
@@ -61,11 +65,21 @@ $proposal_id = (int) $route_match->getParameter('id');
       '#markup' => Link::fromTextAndUrl($proposal_data->name_title . ' ' . $proposal_data->name,Url::fromRoute('entity.user.canonical', ['user' => $proposal_data->uid]))->toString(),
      '#title' => t('Name'),
     ];
-    $form['email_id'] = [
-      '#type' => 'item',
-      '#markup' => User::load($proposal_data->uid)->getEmail(),
-      '#title' => t('Email'),
-    ];
+    // $form['email_id'] = [
+    //   '#type' => 'item',
+    //   '#markup' => User::load($proposal_data->uid)->getEmail(),
+    //   '#title' => t('Email'),
+    // ];
+
+$user = !empty($proposal_data->uid) ? User::load($proposal_data->uid) : NULL;
+
+$email = $user ? $user->getEmail() : 'Not available';
+
+$form['email_id'] = [
+  '#type' => 'item',
+  '#markup' => $email,
+  '#title' => t('Email'),
+];
     $form['contact_ph'] = [
       '#type' => 'item',
       '#markup' => $proposal_data->contact_ph,
@@ -310,34 +324,47 @@ $response->send();
       ];
        $result = \Drupal::database()->query($up_query, $args);
       
-      // \Drupal::service("lab_migration_global")->CreateReadmeFileLabMigration($proposal_id);
-      // if (!$result) {
-      //   \Drupal::messenger()->addmessage('Error in update status', 'error');
-      //   return;
-      // }
-      /* sending email */
-  //     $user_data = User::load($proposal_data->uid);
-  //     $email_to = $user_data->mail;
-  //     $from = $config->get('lab_migration_from_email', '');
-  //     $bcc = $user->mail . ', ' . $config->get('lab_migration_emails', '');
-  //     $cc = $config->get('lab_migration_cc_emails', '');
-  //     $param['proposal_completed']['proposal_id'] = $proposal_id;
-  //     $param['proposal_completed']['user_id'] = $proposal_data->uid;
-  //     $param['proposal_completed']['headers'] = [
-  //       'From' => $from,
-  //       'MIME-Version' => '1.0',
-  //       'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-  //       'Content-Transfer-Encoding' => '8Bit',
-  //       'X-Mailer' => 'Drupal',
-  //       'Cc' => $cc,
-  //       'Bcc' => $bcc,
-  //     ];
-      // if (!drupal_mail('lab_migration', 'proposal_completed', $email_to, language_default(), $param, $from, TRUE)) {
-      //   \Drupal::messenger()->addmessage('Error sending email message.', 'error');
-      // }
-      /*$email_to = $user->mail . ', ' . $config->get('lab_migration_emails', '');;
-        if (!drupal_mail('lab_migration', 'proposal_completed', $email_to , language_default(), $param, $config->get('lab_migration_from_email', NULL), TRUE))
-        \Drupal::messenger()->addmessage('Error sending email message.', 'error');*/
+/* Sending email */
+$user_data = User::load($proposal_data->uid);
+
+if ($user_data && $user_data->getEmail()) {
+
+  $email_to = $user_data->getEmail();
+
+  $config = \Drupal::config('lab_migration.settings');
+  $from = $config->get('lab_migration_from_email');
+  $bcc  = $user->getEmail() . ', ' . $config->get('lab_migration_emails');
+  $cc   = $config->get('lab_migration_cc_emails');
+
+  $params['proposal_completed']['proposal_id'] = $proposal_id;
+  $params['proposal_completed']['user_id']     = $proposal_data->uid;
+  $params['proposal_completed']['headers'] = [
+    'From' => $from,
+    'MIME-Version' => '1.0',
+    'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+    'Content-Transfer-Encoding' => '8Bit',
+    'X-Mailer' => 'Drupal',
+    'Cc' => $cc,
+    'Bcc' => $bcc,
+  ];
+
+  $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
+
+  $mailManager = \Drupal::service('plugin.manager.mail');
+
+  $result = $mailManager->mail(
+    'lab_migration',
+    'proposal_completed',
+    $email_to,
+    $langcode,
+    $params,
+    $from,
+    TRUE
+  );
+
+  if (empty($result['result'])) {
+    \Drupal::messenger()->addMessage(t('Mail sent successfully.'));
+  }
       \Drupal::messenger()->addmessage('Congratulations! Lab Migration proposal has been marked as completed. User has been notified of the completion.', 'status');
     }
     // RedirectResponse('lab-migration/manage-proposal');
@@ -347,6 +374,6 @@ $response->send();
       $response->send();
     return;
   }
-
+  }
 }
 ?>

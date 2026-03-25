@@ -114,7 +114,7 @@ $response->send();
     ];
     $form['code_warning'] = [
       '#type' => 'item',
-      '#title' => t('Upload all the eSim project files in .zip format'),
+      '#title' => t('Upload all the dwsim project files in .zip format'),
       '#prefix' => '<div style="color:red">',
       '#suffix' => '</div>',
     ];
@@ -314,7 +314,7 @@ $response->send();
     $proposal_q = $query->execute();
     $proposal_data = $proposal_q->fetchObject();
     if (!$proposal_data) {
-      add_message("Invalid proposal selected", 'error');
+      \Drupal::messenger()->addMessage("Invalid proposal selected", 'error');
       RedirectResponse('lab_migration/code_approval/upload/' . $proposal_id);
     }
     $proposal_id = $proposal_data->id;
@@ -329,7 +329,7 @@ $response->send();
     $experiment_q = $query->execute();
     $experiment_data = $experiment_q->fetchObject();
     if (!$experiment_data) {
-      add_message("Invalid experiment seleted", 'error');
+      \Drupal::messenger()->addMessage("Invalid experiment seleted", 'error');
       RedirectResponse('lab_migration/code_approval/upload/' . $proposal_id);
     }
     /* create proposal folder if not present */
@@ -347,18 +347,18 @@ $response->send();
     $cur_solution_q = $query->execute();
     if ($cur_solution_d = $cur_solution_q->fetchObject()) {
       if ($cur_solution_d->approval_status == 1) {
-        add_message(t("Solution already approved. Cannot overwrite it."), 'error');
+        \Drupal::messenger()->addMessage(t("Solution already approved. Cannot overwrite it."), 'error');
         RedirectResponse('lab_migration/code_approval/upload/' . $proposal_id);
         return;
       }
       else {
         if ($cur_solution_d->approval_status == 0) {
-          add_message(t("Solution is under pending review. Delete the solution and reupload it."), 'error');
+          \Drupal::messenger()->addMessage(t("Solution is under pending review. Delete the solution and reupload it."), 'error');
           RedirectResponse('lab-migration/code-approval/upload/' . $proposal_id);
           return;
         }
         else {
-          add_message(t("Error uploading solution. Please contact administrator."), 'error');
+          \Drupal::messenger()->addMessage(t("Error uploading solution. Please contact administrator."), 'error');
           RedirectResponse('lab-migration/code-approval/upload/' . $proposal_id);
           return;
         }
@@ -422,7 +422,7 @@ $response->send();
           }
         }
         if (file_exists($root_path . $dest_path . $_FILES['files']['name'][$file_form_name])) {
-          add_message(t("Error uploading file. File !filename already exists.", [
+          \Drupal::messenger()->addMessage(t("Error uploading file. File !filename already exists.", [
             '!filename' => $_FILES['files']['name'][$file_form_name]
             ]), 'error');
           return;
@@ -442,35 +442,45 @@ $response->send();
             ":timestamp" => time(),
           ];
           $injected_database->query($query, $args);
-          add_message($file_name . ' uploaded successfully.', 'status');
+          \Drupal::messenger()->addMessage($file_name . ' uploaded successfully.', 'status');
         }
         else {
-          add_message('Error uploading file : ' . $dest_path . '/' . $file_name, 'error');
+          \Drupal::messenger()->addMessage('Error uploading file : ' . $dest_path . '/' . $file_name, 'error');
         }
       }
     }
-    add_message('Solution uploaded successfully.', 'status');
-    /* sending email */
-    $email_to = $user->mail;
-    $from = $config->get('lab_migration_from_email', '');
-    $bcc = $config->get('lab_migration_emails', '');
-    $cc = $config->get('lab_migration_cc_emails', '');
+    \Drupal::messenger()->addMessage('Solution uploaded successfully.', 'status');  /* sending email */
+
+       $user_data = \Drupal::entityTypeManager()->getStorage('user')->load($proposal_data->uid);
+$email_to = $user_data->getEmail();
+    $from = \Drupal::config('lab_migration.settings')->get('lab_migration_from_email');
+$bcc = \Drupal::config('lab_migration.settings')->get('lab_migration_emails');
+$cc = \Drupal::config('lab_migration.settings')->get('lab_migration_cc_emails');
+
     $param['solution_uploaded']['solution_id'] = $solution_id;
     $param['solution_uploaded']['user_id'] = $user->uid;
-    $param['solution_uploaded']['headers'] = [
-      'From' => $from,
-      'MIME-Version' => '1.0',
-      'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-      'Content-Transfer-Encoding' => '8Bit',
-      'X-Mailer' => 'Drupal',
-      'Cc' => $cc,
-      'Bcc' => $bcc,
-    ];
-    if (!drupal_mail('lab_migration', 'solution_uploaded', $email_to, language_default(), $param, $from, TRUE)) {
-      add_message('Error sending email message.', 'error');
-    }
+    $param['solution_uploaded']['headers'] = [  'From' => $from,
+          'MIME-Version' => '1.0',
+          'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+          'Content-Transfer-Encoding' => '8Bit',
+          'X-Mailer' => 'Drupal',
+          'Cc' => $cc,
+          'Bcc' => $bcc,
+];
+
+  $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
+      $mail_manager = \Drupal::service('plugin.manager.mail');
+  if (!\Drupal::service('plugin.manager.mail')->mail('lab_migration', 'proposal_uploaded', $email_to, 'en', $params, $form, TRUE));
+  { \Drupal::messenger()->addMessage('Mail sent successfully.');
+  }
+
+
+    // if (!drupal_mail('lab_migration', 'solution_uploaded', $email_to, language_default(), $param, $from, TRUE)) {
+    //   add_message('Error sending email message.', 'error');
+    // }
     RedirectResponse('lab-migration/code-approval/bulk/');
   }
 
 }
+    
 ?>

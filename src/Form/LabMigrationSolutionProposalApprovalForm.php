@@ -13,6 +13,10 @@ use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Drupal\user\Entity\User;
+use Drupal\Core\Link;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 class LabMigrationSolutionProposalApprovalForm extends FormBase {
 
@@ -42,18 +46,17 @@ $proposal_id = (int) $route_match->getParameter('proposal_id');
       else {
         \Drupal::messenger()->addmessage($this->t('Invalid proposal selected. Please try again.'), 'error');
         // RedirectResponse('lab-migration/manage-proposal/pending-solution-proposal');
-        $url = Url::fromRoute('lab_migration.manage_proposal_pending_solution');
-    $response = new RedirectResponse($url->toString());
-    
+    //     $url = Url::fromRoute('lab_migration.proposal_pending_solution');
+    // $response = new RedirectResponse($url->toString());
+    $form_state->setRedirect('lab_migration.manage_proposal.pending_solution_proposal');
     // Send the response back to the client
-    return $response;
+    
         return;
       }
     }
     else {
-      \Drupal::messenger()->add_message($this->t('Invalid proposal selected. Please try again.'), 'error');
-      RedirectResponse('lab-migration/manage-proposal/pending-solution-proposal');
-      return;
+      \Drupal::messenger()->addMessage($this->t('Invalid proposal selected. Please try again.'), 'error');
+      $form_state->setRedirect('lab_migration.manage_proposal.pending_solution_proposal');      return;
     }
     $form['name'] = [
       '#type' => 'item',
@@ -103,10 +106,10 @@ $proposal_id = (int) $route_match->getParameter('proposal_id');
     ];
 
 
-    $form['esim_version'] = [
+    $form['dwsim_version'] = [
       '#type' => 'item',
-      '#title' => t('eSim version used'),
-      '#markup' => $proposal_data->esim_version,
+      '#title' => t('dwsim version used'),
+      '#markup' => $proposal_data->dwsim_version,
     ];
 
 
@@ -135,7 +138,7 @@ $proposal_id = (int) $route_match->getParameter('proposal_id');
     ];
     $form['solution_display'] = [
       '#type' => 'item',
-      '#title' => t('Display the solution on the www.esim.fossee.in website'),
+      '#title' => t('Display the solution on the www.dwsim.fossee.in website'),
       '#markup' => ($proposal_data->solution_display == 1) ? "Yes" : "No",
     ];
     /*if ($proposal_data->solution_provider_uid == 0)
