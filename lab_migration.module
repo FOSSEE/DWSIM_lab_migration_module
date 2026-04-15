@@ -5,15 +5,15 @@
  */
 use Drupal\user\Entity\User;
 
-function lm_ucname($string) {
-  $string = ucwords(strtolower($string));
-  foreach (array('-', '\'') as $delimiter) {
-    if (strpos($string, $delimiter) !== false) {
-      $string = implode($delimiter, array_map('ucfirst', explode($delimiter, $string)));
-    }
-  }
-  return $string;
-}
+// function lm_ucname($string) {
+//   $string = ucwords(strtolower($string));
+//   foreach (array('-', '\'') as $delimiter) {
+//     if (strpos($string, $delimiter) !== false) {
+//       $string = implode($delimiter, array_map('ucfirst', explode($delimiter, $string)));
+//     }
+//   }
+//   return $string;
+// }
 
 
 function lab_migration_mail($key, &$message, $params) {
@@ -357,7 +357,11 @@ case 'solution_approved':
   $message['subject'] = t('[@site] Your uploaded Lab migration solution has been approved', [
     '@site' => $site_name,
   ]);
-     
+     $uid = $params['solution_approved']['user_id'] ?? NULL;
+$user = $uid ? User::load($uid) : NULL;
+
+$username = $user ? $user->getDisplayName() : 'User';
+
 
   /* Body */
   $message['body'][] = t('
@@ -378,8 +382,8 @@ Best Wishes,
 @site Team
 FOSSEE, IIT Bombay', [
     '@site' => $site_name,
-    '@user_name' => $user_data->getDisplayName(),
-  ]);
+    '@user_name' => $username,  ]);
+  
 
   break;
 
